@@ -16,17 +16,26 @@ body { margin:0; background:black; }
 
 <script>
 
+var player;
+
 function onYouTubeIframeAPIReady() {
 
-  new YT.Player('player', {
-    videoId: 'z87vjdQ8I1Q',
+  player = new YT.Player('player', {
+    videoId: '',
     playerVars: {
       autoplay: 1,
       controls: 0,
-      playsinline: 1
+      playsinline: 1,
+      rel: 0
     }
   });
 
+}
+
+function playVideo(videoId){
+   if(player){
+      player.loadVideoById(videoId);
+   }
 }
 
 </script>
