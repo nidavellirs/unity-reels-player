@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body { margin:0; background:black; }
-#player { width:100%; height:100%; position:absolute; }
+#player { position:absolute; top:0; left:0; width:100%; height:100%; }
 </style>
 </head>
 
@@ -17,19 +17,21 @@ body { margin:0; background:black; }
 <script>
 
 var player;
-var playerReady = false;
+var ready = false;
 
 function onYouTubeIframeAPIReady() {
 
     player = new YT.Player('player', {
-        height: '100%',
         width: '100%',
+        height: '100%',
         videoId: '',
         playerVars: {
             autoplay: 1,
             controls: 0,
+            rel: 0,
             playsinline: 1,
-            rel: 0
+            enablejsapi: 1,
+            origin: "https://youtube.com"
         },
         events: {
             'onReady': onPlayerReady
@@ -38,18 +40,18 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-    playerReady = true;
+    ready = true;
 }
 
-// Called from Unity
-function playVideo(videoId) {
+function playVideo(videoId){
 
-    if(!playerReady){
-        console.log("Player not ready yet");
+    if(!ready){
+        console.log("Player not ready");
         return;
     }
 
-    player.loadVideoById(videoId);
+    player.cueVideoById(videoId);
+    player.playVideo();
 }
 
 </script>
