@@ -13,44 +13,34 @@ body { margin:0; background:black; }
 <div id="player"></div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
+<script>
 
 var startY = 0;
 var endY = 0;
 
-document.addEventListener("touchstart", function(e) {
+document.addEventListener("touchstart", function(e){
     startY = e.touches[0].clientY;
 });
 
-document.addEventListener("touchend", function(e) {
+document.addEventListener("touchend", function(e){
+
     endY = e.changedTouches[0].clientY;
 
     var diff = endY - startY;
 
-    // swipe up
-    if (diff < -100) {
-        console.log("Swipe Up Detected");
-        sendToUnity("NextReel");
+    if(diff < -100){
+        console.log("Swipe Up");
+        window.location = "unity:next";
     }
 
-    // swipe down
-    if (diff > 100) {
-        console.log("Swipe Down Detected");
-        sendToUnity("PreviousReel");
+    if(diff > 100){
+        console.log("Swipe Down");
+        window.location = "unity:previous";
     }
+
 });
 
-function sendToUnity(action) {
-
-    // Android bridge
-    if (window.GPMWebView) {
-        window.GPMWebView.postMessage(action);
-    }
-
-}
-
 </script>
-
 <script>
 
 var player;
