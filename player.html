@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { margin:0; background:black; }
+#player { width:100%; height:100%; position:absolute; }
+</style>
+</head>
+
+<body>
+
+<div id="player"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+
+function onYouTubeIframeAPIReady() {
+
+  new YT.Player('player', {
+    videoId: 'z87vjdQ8I1Q',
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+      playsinline: 1
+    }
+  });
+
+}
+
+</script>
+
+</body>
+</html>
