@@ -345,6 +345,22 @@
         handleTap()
     })
 
+    overlay.addEventListener("pointerdown",function(e){
+        startY = e.clientY
+    })
+
+    overlay.addEventListener("pointerup",function(e){
+        let diff = startY - e.clientY
+        if(diff > 70){
+            nextVideo()
+            return
+        }
+        if(diff < -70){
+            prevVideo()
+            return
+        }
+        handleTap()
+    })
 
     /* ---------------- CLICK DESKTOP ---------------- */
 
@@ -368,7 +384,7 @@
     /* ---------------- START APP ---------------- */
     initFeed()
 
-   /* document.body.addEventListener("click",function(){
+    document.body.addEventListener("click",function(){
 
         if(player){
             try{
@@ -376,7 +392,7 @@
             }catch(e){}
         }
 
-    },{once:true})*/
+    },{once:true})
 
     function unlockPlayer(){
         try{
