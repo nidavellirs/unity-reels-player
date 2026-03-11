@@ -96,6 +96,9 @@
 
     let isUnmuted = false
     let startY = 0
+    let lastGestureTime = 0
+    const GESTURE_LOCK = 250
+
     let touchHandled = false
 
     let overlay = document.getElementById("overlay")
@@ -302,12 +305,12 @@
             isUnmuted = true
             document.getElementById("tapSound").style.display="none"
 
+
             return
         }
 
         console.log("isPlaying",isPlaying);
         if(isPlaying){
-
             player.pauseVideo()
             showPlayIcon()
             isPlaying = false
@@ -331,18 +334,12 @@
     })
 
     overlay.addEventListener("touchend",function(e){
-        touchHandled = true
+        let now = Date.now()
+        if(now - lastGestureTime < GESTURE_LOCK) return
+        lastGestureTime = now
+
         let endY = e.changedTouches[0].clientY
-        let diff = startY - endY
-        if(diff > 70){
-            nextVideo()
-            return
-        }
-        if(diff < -70){
-            prevVideo()
-            return
-        }
-        handleTap()
+        handleGesture(startY,endY)
     })
 
     overlay.addEventListener("pointerdown",function(e){
@@ -350,25 +347,20 @@
     })
 
     overlay.addEventListener("pointerup",function(e){
-        let diff = startY - e.clientY
-        if(diff > 70){
-            nextVideo()
-            return
-        }
-        if(diff < -70){
-            prevVideo()
-            return
-        }
-        handleTap()
+        let now = Date.now()
+        if(now - lastGestureTime < GESTURE_LOCK) return
+        lastGestureTime = now
+
+        handleGesture(startY,e.clientY)
     })
 
     /* ---------------- CLICK DESKTOP ---------------- */
 
     overlay.addEventListener("click",function(){
-        if(touchHandled){
-            touchHandled = false
-            return
-        }
+        let now = Date.now()
+        if(now - lastGestureTime < GESTURE_LOCK) return
+        lastGestureTime = now
+
         handleTap()
     })
 
@@ -393,6 +385,25 @@
         }
 
     },{once:true})
+
+    function handleGesture(start,end){
+
+        let diff = start - end
+
+        if(Math.abs(diff) > 70){
+
+            if(diff > 0){
+                nextVideo()
+            }else{
+                prevVideo()
+            }
+
+            return
+        }
+
+        handleTap()
+    }
+
 
     function unlockPlayer(){
         try{
