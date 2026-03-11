@@ -180,7 +180,16 @@
             },
             events:{
                 onReady:function(e){
-                    e.target.playVideo()
+                    player = e.target
+
+                    setTimeout(()=>{
+                        try{
+                            player.mute()
+                            player.playVideo()
+                        }catch(err){
+                            console.log("Autoplay blocked")
+                        }
+                    },500)
                 },
                 onStateChange:function(e){
                     if(e.data == YT.PlayerState.ENDED){
@@ -296,6 +305,23 @@
         handleTap()
     })
 
+    overlay.addEventListener("pointerdown",function(e){
+        startY = e.clientY
+    })
+
+    overlay.addEventListener("pointerup",function(e){
+        let diff = startY - e.clientY
+        if(diff > 70){
+            nextVideo()
+            return
+        }
+        if(diff < -70){
+            prevVideo()
+            return
+        }
+        handleTap()
+    })
+
     /* ---------------- CLICK DESKTOP ---------------- */
 
     overlay.addEventListener("click",function(){
@@ -317,6 +343,16 @@
     })
     /* ---------------- START APP ---------------- */
     initFeed()
+
+    document.body.addEventListener("click",function(){
+
+        if(player){
+            try{
+                player.playVideo()
+            }catch(e){}
+        }
+
+    },{once:true})
 </script>
 
 </body>
