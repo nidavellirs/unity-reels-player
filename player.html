@@ -11,13 +11,12 @@
         }
 
         #player{
-            position:fixed;
-            top:0;
-            left:0;
-            width:100vw;
-            height:100vh;
-            overflow:hidden;
-            background:black;
+            position:absolute;
+            top:50%;
+            left:50%;
+            width:110vw;
+            height:110vh;
+            transform:translate(-50%,-50%);
         }
 
         /* force youtube iframe to cover screen */
@@ -183,8 +182,7 @@
 
                     setTimeout(()=>{
                         try{
-                            player.setVolume(100)
-                            player.unMute()
+                            player.mute()
                             player.playVideo()
                         }catch(err){
                             console.log("Autoplay blocked")
