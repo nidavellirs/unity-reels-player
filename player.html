@@ -213,7 +213,7 @@
 
         if(currentIndex < videoIds.length - 1){
             currentIndex++
-            player.loadVideoById(videoIds[currentIndex])
+            player.cueVideoById(videoIds[currentIndex])
             centerControl.style.display="none"
 
             setTimeout(()=>{
@@ -236,7 +236,7 @@
 
         if(currentIndex > 0){
             currentIndex--
-            player.loadVideoById(videoIds[currentIndex])
+            player.cueVideoById(videoIds[currentIndex])
             centerControl.style.display="none"
             setTimeout(()=>{
                 try{
