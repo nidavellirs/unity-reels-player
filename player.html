@@ -183,16 +183,14 @@
             events:{
                 onReady:function(e){
                     player = e.target
-
                     setTimeout(()=>{
                         try{
-                            player.mute()
-                            player.playVideo()
-
+                            player.mute()        // start muted (required for autoplay on mobile/webview)
+                            player.playVideo()   // start first video
                         }catch(err){
                             console.log("Autoplay blocked")
                         }
-                    },500)
+                    },300)
                 },
                 onStateChange:function(e){
                     if(e.data === YT.PlayerState.ENDED){
@@ -301,9 +299,10 @@
 
     /* ---------------- TAP LOGIC ---------------- */
     function handleTap(){
-
+        alert("called2");
         if(!isUnmuted){
 
+            alert("called4" + state);
             player.unMute()
             player.setVolume(100)
 
@@ -315,6 +314,7 @@
 
         let state = player.getPlayerState()
 
+        alert("called4" + state);
         if(state === YT.PlayerState.PLAYING){
 
             player.pauseVideo()
@@ -361,11 +361,13 @@
     /* ---------------- CLICK DESKTOP ---------------- */
 
     overlay.addEventListener("click",function(){
+        alert("called1");
         let now = Date.now()
         if(now - lastGestureTime < GESTURE_LOCK) return
         lastGestureTime = now
 
         handleTap()
+
     })
 
     /* ---------------- SCROLL DESKTOP ---------------- */
