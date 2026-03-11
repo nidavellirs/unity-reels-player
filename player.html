@@ -92,14 +92,13 @@
     let player
     let currentIndex = 0
     let videoIds = []
-    let isPlaying = true
+    let isPlaying = false
 
     let isUnmuted = false
     let startY = 0
     let lastGestureTime = 0
     const GESTURE_LOCK = 250
 
-    let touchHandled = false
 
     let overlay = document.getElementById("overlay")
     let centerControl = document.getElementById("centerControl")
@@ -189,15 +188,23 @@
                         try{
                             player.mute()
                             player.playVideo()
-                            isPlaying = true
+
                         }catch(err){
                             console.log("Autoplay blocked")
                         }
                     },500)
                 },
                 onStateChange:function(e){
-                    if(e.data == YT.PlayerState.ENDED){
+                    if(e.data === YT.PlayerState.ENDED){
                         nextVideo()
+                    }
+
+                    if(e.data === YT.PlayerState.PLAYING){
+                        isPlaying = true
+                    }
+
+                    if(e.data === YT.PlayerState.PAUSED){
+                        isPlaying = false
                     }
                 }
             }
@@ -229,17 +236,14 @@
                     if(isUnmuted){
                         player.unMute()
                         player.setVolume(100)
-                        isPlaying = true
+
                     }else{
                         player.mute()
                     }
 
                 }catch(e){}
-            },200)
+            },400)
 
-            if(isUnmuted){
-                player.unMute()
-            }
             /* PREFETCH MORE REELS WHEN USER REACHES 3rd VIDEO */
             if(videoIds.length - currentIndex <= 2){
                 fetchReels()
@@ -261,16 +265,13 @@
                     if(isUnmuted){
                         player.unMute()
                         player.setVolume(100)
-                        isPlaying = true
+
                     }else{
                         player.mute()
                     }
 
                 }catch(e){}
-            },200)
-            if(isUnmuted){
-                player.unMute()
-            }
+            },400)
         }
     }
 
@@ -305,21 +306,20 @@
             isUnmuted = true
             document.getElementById("tapSound").style.display="none"
 
-
             return
         }
 
-        console.log("isPlaying",isPlaying);
-        if(isPlaying){
+        let state = player.getPlayerState()
+
+        if(state === YT.PlayerState.PLAYING){
+
             player.pauseVideo()
             showPlayIcon()
-            isPlaying = false
 
         }else{
 
             player.playVideo()
             showPauseIcon()
-            isPlaying = true
 
             setTimeout(()=>{
                 centerControl.style.display="none"
@@ -390,7 +390,7 @@
 
         let diff = start - end
 
-        if(Math.abs(diff) > 70){
+        if(Math.abs(diff) > 90){
 
             if(diff > 0){
                 nextVideo()
