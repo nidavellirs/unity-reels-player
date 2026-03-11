@@ -353,6 +353,15 @@
         }
 
     },{once:true})
+
+    function unlockPlayer(){
+        try{
+            player.mute();
+            player.playVideo();
+        }catch(e){
+            console.log("unlock failed");
+        }
+    }
 </script>
 
 </body>
