@@ -218,9 +218,18 @@
 
             setTimeout(()=>{
                 try{
+
                     player.playVideo()
+
+                    if(isUnmuted){
+                        player.unMute()
+                        player.setVolume(100)
+                    }else{
+                        player.mute()
+                    }
+
                 }catch(e){}
-            },300)
+            },200)
 
             if(isUnmuted){
                 player.unMute()
@@ -240,9 +249,18 @@
             centerControl.style.display="none"
             setTimeout(()=>{
                 try{
+
                     player.playVideo()
+
+                    if(isUnmuted){
+                        player.unMute()
+                        player.setVolume(100)
+                    }else{
+                        player.mute()
+                    }
+
                 }catch(e){}
-            },300)
+            },200)
             if(isUnmuted){
                 player.unMute()
             }
