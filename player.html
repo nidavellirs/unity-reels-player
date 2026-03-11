@@ -195,11 +195,11 @@
                     },500)
                 },
                 onStateChange:function(e){
-                    if(e.data == YT.PlayerState.ENDED){
+                    if(e.data === YT.PlayerState.ENDED){
                         nextVideo()
                     }
 
-                    if(e.data == YT.PlayerState.CUED && autoPlayPending){
+                    if(e.data === YT.PlayerState.CUED && autoPlayPending){
 
                         autoPlayPending = false
 
@@ -238,16 +238,20 @@
 
             currentIndex++
 
-            try{
-                player.stopVideo()
-            }catch(e){}
-
-            autoPlayPending = true
-
-            player.cueVideoById(videoIds[currentIndex])
-
             centerControl.style.display = "none"
 
+            try{
+                player.loadVideoById(videoIds[currentIndex])
+            }catch(e){}
+
+            if(isUnmuted){
+                player.unMute()
+                player.setVolume(100)
+            }else{
+                player.mute()
+            }
+
+            /* PREFETCH MORE REELS WHEN USER REACHES 3rd VIDEO */
             if(videoIds.length - currentIndex <= 2){
                 fetchReels()
             }
@@ -260,15 +264,18 @@
 
             currentIndex--
 
+            centerControl.style.display = "none"
+
             try{
-                player.stopVideo()
+                player.loadVideoById(videoIds[currentIndex])
             }catch(e){}
 
-            autoPlayPending = true
-
-            player.cueVideoById(videoIds[currentIndex])
-
-            centerControl.style.display = "none"
+            if(isUnmuted){
+                player.unMute()
+                player.setVolume(100)
+            }else{
+                player.mute()
+            }
         }
     }
 
