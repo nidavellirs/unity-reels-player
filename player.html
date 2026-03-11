@@ -215,6 +215,13 @@
             currentIndex++
             player.loadVideoById(videoIds[currentIndex])
             centerControl.style.display="none"
+
+            setTimeout(()=>{
+                try{
+                    player.playVideo()
+                }catch(e){}
+            },300)
+
             if(isUnmuted){
                 player.unMute()
             }
@@ -231,6 +238,11 @@
             currentIndex--
             player.loadVideoById(videoIds[currentIndex])
             centerControl.style.display="none"
+            setTimeout(()=>{
+                try{
+                    player.playVideo()
+                }catch(e){}
+            },300)
             if(isUnmuted){
                 player.unMute()
             }
