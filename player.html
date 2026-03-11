@@ -183,7 +183,8 @@
 
                     setTimeout(()=>{
                         try{
-                            //player.mute()
+                            player.setVolume(100)
+                            player.unMute()
                             player.playVideo()
                         }catch(err){
                             console.log("Autoplay blocked")
