@@ -326,7 +326,7 @@
 
     /* ---------------- TOUCH EVENTS ---------------- */
 
-   /* overlay.addEventListener("touchstart",function(e){
+    overlay.addEventListener("touchstart",function(e){
         startY = e.touches[0].clientY
     })
 
@@ -343,34 +343,18 @@
             return
         }
         handleTap()
-    })*/
-
-    overlay.addEventListener("pointerdown",function(e){
-        startY = e.clientY
     })
 
-    overlay.addEventListener("pointerup",function(e){
-        let diff = startY - e.clientY
-        if(diff > 70){
-            nextVideo()
-            return
-        }
-        if(diff < -70){
-            prevVideo()
-            return
-        }
-        handleTap()
-    })
 
     /* ---------------- CLICK DESKTOP ---------------- */
 
-   /* overlay.addEventListener("click",function(){
+    overlay.addEventListener("click",function(){
         if(touchHandled){
             touchHandled = false
             return
         }
         handleTap()
-    })*/
+    })
 
     /* ---------------- SCROLL DESKTOP ---------------- */
 
