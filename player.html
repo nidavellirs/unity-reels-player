@@ -224,11 +224,20 @@
     function nextVideo(){
 
         if(currentIndex < videoIds.length - 1){
+
             currentIndex++
+
+            // reset player state (important for WebView)
+            try{
+                player.stopVideo()
+            }catch(e){}
+
             player.cueVideoById(videoIds[currentIndex])
-            centerControl.style.display="none"
+
+            centerControl.style.display = "none"
 
             setTimeout(()=>{
+
                 try{
 
                     player.playVideo()
@@ -236,12 +245,12 @@
                     if(isUnmuted){
                         player.unMute()
                         player.setVolume(100)
-
                     }else{
                         player.mute()
                     }
 
                 }catch(e){}
+
             },400)
 
             /* PREFETCH MORE REELS WHEN USER REACHES 3rd VIDEO */
@@ -254,10 +263,19 @@
     function prevVideo(){
 
         if(currentIndex > 0){
+
             currentIndex--
+
+            try{
+                player.stopVideo()
+            }catch(e){}
+
             player.cueVideoById(videoIds[currentIndex])
-            centerControl.style.display="none"
+
+            centerControl.style.display = "none"
+
             setTimeout(()=>{
+
                 try{
 
                     player.playVideo()
@@ -265,12 +283,12 @@
                     if(isUnmuted){
                         player.unMute()
                         player.setVolume(100)
-
                     }else{
                         player.mute()
                     }
 
                 }catch(e){}
+
             },400)
         }
     }
