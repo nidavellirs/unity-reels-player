@@ -92,6 +92,7 @@
     let player
     let currentIndex = 0
     let videoIds = []
+    let isPlaying = true
 
     let isUnmuted = false
     let startY = 0
@@ -185,6 +186,7 @@
                         try{
                             player.mute()
                             player.playVideo()
+                            isPlaying = true
                         }catch(err){
                             console.log("Autoplay blocked")
                         }
@@ -224,6 +226,7 @@
                     if(isUnmuted){
                         player.unMute()
                         player.setVolume(100)
+                        isPlaying = true
                     }else{
                         player.mute()
                     }
@@ -255,6 +258,7 @@
                     if(isUnmuted){
                         player.unMute()
                         player.setVolume(100)
+                        isPlaying = true
                     }else{
                         player.mute()
                     }
@@ -291,22 +295,29 @@
     function handleTap(){
 
         if(!isUnmuted){
+
             player.unMute()
             player.setVolume(100)
+
             isUnmuted = true
             document.getElementById("tapSound").style.display="none"
-            return
 
+            return
         }
 
-        let state = player.getPlayerState()
-        if(state == YT.PlayerState.PLAYING){
+        console.log("isPlaying",isPlaying);
+        if(isPlaying){
+
             player.pauseVideo()
             showPlayIcon()
+            isPlaying = false
+
         }else{
 
             player.playVideo()
             showPauseIcon()
+            isPlaying = true
+
             setTimeout(()=>{
                 centerControl.style.display="none"
             },500)
@@ -315,7 +326,7 @@
 
     /* ---------------- TOUCH EVENTS ---------------- */
 
-    overlay.addEventListener("touchstart",function(e){
+   /* overlay.addEventListener("touchstart",function(e){
         startY = e.touches[0].clientY
     })
 
@@ -332,7 +343,7 @@
             return
         }
         handleTap()
-    })
+    })*/
 
     overlay.addEventListener("pointerdown",function(e){
         startY = e.clientY
@@ -353,13 +364,13 @@
 
     /* ---------------- CLICK DESKTOP ---------------- */
 
-    overlay.addEventListener("click",function(){
+   /* overlay.addEventListener("click",function(){
         if(touchHandled){
             touchHandled = false
             return
         }
         handleTap()
-    })
+    })*/
 
     /* ---------------- SCROLL DESKTOP ---------------- */
 
