@@ -240,7 +240,7 @@ function handleTap(){
 
         isUnmuted = true
         document.getElementById("tapSound").style.display="none"
-        alert("Sound enabled")
+        alert("Sound enabled1")
         return
     }
 
