@@ -252,15 +252,30 @@ function handleTap(){
         player.pauseVideo()
         showPlayIcon()
     }else{
-        alert("Playing Video")
 
-        let state = player.getPlayerState()
-        alert("Player state: "+state)
-        player.playVideo()
-        state = player.getPlayerState()
-        alert("Player state: "+state)
-        showPauseIcon()
 
+        try{
+            alert("Playing Video")
+            let state = player.getPlayerState()
+            alert("Player state: "+state)
+            player.playVideo()
+
+            // WebView wake-up fix
+            setTimeout(()=>{
+                try{
+                    if(player.getPlayerState() !== YT.PlayerState.PLAYING){
+                        player.seekTo(player.getCurrentTime() + 0.01, true)
+                        player.playVideo()
+
+                        state = player.getPlayerState()
+                        alert("Player state: "+state)
+                    }
+                }catch(e){}
+            },200)
+
+            showPauseIcon()
+
+        }catch(e){}
         setTimeout(()=>{
             centerControl.style.display="none"
         },800)
