@@ -241,7 +241,7 @@ function handleTap(){
 
         isUnmuted = true
         document.getElementById("tapSound").style.display="none"
-
+        alert("Sound enabled")
         return
     }
 
@@ -249,12 +249,12 @@ function handleTap(){
 
 
     if(state === YT.PlayerState.PLAYING){
-
+        alert("Pausing Video")
         player.pauseVideo()
         showPlayIcon()
 
     }else{
-
+        alert("Playing Video")
         player.playVideo()
         showPauseIcon()
 
