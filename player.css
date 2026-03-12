@@ -5,14 +5,17 @@ body{
     font-family:Arial;
 }
 
-#player{
+#playerContainer{
     position:fixed;
     top:0;
     left:0;
     width:100vw;
     height:100vh;
-    overflow:hidden;
-    background:black;
+}
+
+#player{
+    width:100%;
+    height:100%;
 }
 
 /* force youtube iframe to cover screen */
@@ -73,13 +76,13 @@ body{
 /** OVERLAY **/
 
 /* ── UI OVERLAY ── */
-#uiOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
+#uiOverlay{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
 }
 
 #uiOverlay .categories,
@@ -379,4 +382,11 @@ body{
     .top-header {
         padding-top: calc(16px + env(safe-area-inset-top));
     }
+}
+
+.top-header,
+.categories,
+.overlay,
+.category-item{
+    pointer-events:auto;
 }

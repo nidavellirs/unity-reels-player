@@ -8,40 +8,40 @@
 
 <body>
 
-<div id="player"></div>
-<div id="overlay">
-    <div id="uiOverlay">
-        <!-- Top Header -->
-        <div class="top-header">
-            <img src="logo.png" class="app-logo" alt="Durlabh Darshan">
-        </div>
+<div id="playerContainer">
+    <div id="player"></div>
+    <div id="overlay">
+        <div id="uiOverlay">
+            <!-- Top Header -->
+            <div class="top-header">
+                <img src="logo.png" class="app-logo" alt="Durlabh Darshan">
+            </div>
 
-        <!-- Right Categories -->
-        <div class="categories" id="categories"></div>
+            <!-- Right Categories -->
+            <div class="categories" id="categories"></div>
 
-        <!-- Bottom gradient fade -->
-        <div class="bottom-gradient"></div>
+            <!-- Bottom gradient fade -->
+            <div class="bottom-gradient"></div>
 
-        <!-- Channel name only, no share -->
-        <div class="overlay">
-            <div class="bottom-row">
-                <div class="bottom-left">
-                    <div class="channel-row">
-                        <svg class="yt-icon" viewBox="0 0 90 63" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M88.1 9.9C87.1 6.3 84.2 3.4 80.6 2.4 73.5 0.5 45.2 0.5 45.2 0.5S16.9 0.5 9.8 2.4C6.2 3.4 3.3 6.3 2.3 9.9 0.4 17 0.4 31.7 0.4 31.7S0.4 46.4 2.3 53.5C3.3 57.1 6.2 60 9.8 61 16.9 62.9 45.2 62.9 45.2 62.9S73.5 62.9 80.6 61C84.2 60 87.1 57.1 88.1 53.5 90 46.4 90 31.7 90 31.7S90 17 88.1 9.9Z" fill="#FF0000"/>
-                            <polygon points="36,45.2 59.4,31.7 36,18.2" fill="white"/>
-                        </svg>
-                        <span class="channel-name" id="channelName">Bhakti Reels</span>
+            <!-- Channel name only, no share -->
+            <div class="overlay">
+                <div class="bottom-row">
+                    <div class="bottom-left">
+                        <div class="channel-row">
+                            <svg class="yt-icon" viewBox="0 0 90 63" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M88.1 9.9C87.1 6.3 84.2 3.4 80.6 2.4 73.5 0.5 45.2 0.5 45.2 0.5S16.9 0.5 9.8 2.4C6.2 3.4 3.3 6.3 2.3 9.9 0.4 17 0.4 31.7 0.4 31.7S0.4 46.4 2.3 53.5C3.3 57.1 6.2 60 9.8 61 16.9 62.9 45.2 62.9 45.2 62.9S73.5 62.9 80.6 61C84.2 60 87.1 57.1 88.1 53.5 90 46.4 90 31.7 90 31.7S90 17 88.1 9.9Z" fill="#FF0000"/>
+                                <polygon points="36,45.2 59.4,31.7 36,18.2" fill="white"/>
+                            </svg>
+                            <span class="channel-name" id="channelName">Bhakti Reels</span>
+                        </div>
+                        <div class="reel-title" id="reelTitle">Title goes here</div>
                     </div>
-                    <div class="reel-title" id="reelTitle">Title goes here</div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
-
-
 <div id="tapSound">Tap to enable sound</div>
 <div id="centerControl"></div>
 <script src="categories.js"></script>
