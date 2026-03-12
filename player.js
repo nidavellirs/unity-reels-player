@@ -250,7 +250,6 @@ function handleTap(){
 
     let state = player.getPlayerState()
 
-    alert("Player state: "+state)
     if(state === YT.PlayerState.PLAYING){
         alert("Pausing Video")
         setTimeout(()=>{
@@ -266,7 +265,12 @@ function handleTap(){
 
         setTimeout(()=>{
             try{
+
+                let state = player.getPlayerState()
+                alert("Player state: "+state)
                 player.playVideo()
+                state = player.getPlayerState()
+                alert("Player state: "+state)
                 showPauseIcon()
             }catch(e){}
         },250)
@@ -275,7 +279,7 @@ function handleTap(){
 
         setTimeout(()=>{
             centerControl.style.display="none"
-        },500)
+        },800)
     }
 }
 
