@@ -238,8 +238,18 @@
             centerControl.style.display = "none"
 
             try{
+                player.stopVideo()   // reset internal player state
+            }catch(e){}
+
+            try{
                 player.loadVideoById(videoIds[currentIndex])
             }catch(e){}
+
+            setTimeout(()=>{
+                try{
+                    player.playVideo()
+                }catch(e){}
+            },250)
 
             if(isUnmuted){
                 player.unMute()
@@ -248,7 +258,6 @@
                 player.mute()
             }
 
-            /* PREFETCH MORE REELS WHEN USER REACHES 3rd VIDEO */
             if(videoIds.length - currentIndex <= 2){
                 fetchReels()
             }
@@ -264,8 +273,18 @@
             centerControl.style.display = "none"
 
             try{
+                player.stopVideo()
+            }catch(e){}
+
+            try{
                 player.loadVideoById(videoIds[currentIndex])
             }catch(e){}
+
+            setTimeout(()=>{
+                try{
+                    player.playVideo()
+                }catch(e){}
+            },250)
 
             if(isUnmuted){
                 player.unMute()
@@ -300,8 +319,12 @@
     function handleTap(){
 
         if(!isUnmuted){
+
             player.unMute()
             player.setVolume(100)
+
+            // important for Android WebView
+            player.playVideo()
 
             isUnmuted = true
             document.getElementById("tapSound").style.display="none"
@@ -366,7 +389,7 @@
     /* ---------------- START APP ---------------- */
     initFeed()
 
-    document.body.addEventListener("click",function(){
+ /*   document.body.addEventListener("click",function(){
 
         if(player){
             try{
@@ -374,7 +397,7 @@
             }catch(e){}
         }
 
-    },{once:true})
+    },{once:true})*/
 
     function handleGesture(start,end){
 
