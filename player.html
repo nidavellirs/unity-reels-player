@@ -23,11 +23,10 @@
         /* force youtube iframe to cover screen */
         #player iframe{
             position:absolute;
-            top:50%;
-            left:50%;
-            width:110vw;
-            height:110vh;
-            transform:translate(-50%,-50%);
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
         }
 
         #overlay{
@@ -37,6 +36,8 @@
             width:100vw;
             height:100vh;
             z-index:10;
+            background:transparent;
+
         }
 
         #tapSound{
@@ -167,29 +168,33 @@
     function createPlayer(){
         player = new YT.Player('player',{
             videoId: videoIds[currentIndex],
-            playerVars: {
+            playerVars:{
                 autoplay:1,
                 mute:1,
                 controls:0,
-                modestbranding:1,
                 rel:0,
+                modestbranding:1,
                 playsinline:1,
-                showinfo:0,
-                iv_load_policy:3,
+                enablejsapi:1,
                 fs:0,
-                disablekb:1
+                iv_load_policy:3,
+                origin:window.location.origin
             },
             events:{
                 onReady:function(e){
                     player = e.target
+
+                    alert("player ready")
+
                     setTimeout(()=>{
                         try{
-                            player.mute()        // start muted (required for autoplay on mobile/webview)
-                            player.playVideo()   // start first video
+                            player.mute()
+                            player.playVideo()
+                            alert("play called")
                         }catch(err){
-                            console.log("Autoplay blocked")
+                            alert("error")
                         }
-                    },300)
+                    },500)
                 },
                 onStateChange:function(e){
                     if(e.data === YT.PlayerState.ENDED){
@@ -318,36 +323,48 @@
     /* ---------------- TAP LOGIC ---------------- */
     function handleTap(){
 
+        alert("Tap detected");
+
         if(!isUnmuted){
 
-            player.unMute()
-            player.setVolume(100)
+            alert("Trying to unmute");
 
-            // important for Android WebView
-            player.playVideo()
+            try{
+                unMuteVideo();
+                player.setVolume(100);
+                playVideo();
+                alert("Unmute + play called");
+            }catch(e){
+                alert("Unmute error: " + e);
+            }
 
-            isUnmuted = true
-            document.getElementById("tapSound").style.display="none"
-
-            return
+            isUnmuted = true;
+            document.getElementById("tapSound").style.display="none";
+            return;
         }
 
-        let state = player.getPlayerState()
-
+        let state = player.getPlayerState();
+        alert("Player state: " + state);
 
         if(state === YT.PlayerState.PLAYING){
 
-            player.pauseVideo()
-            showPlayIcon()
+            alert("Pausing video");
+
+            try{
+                pauseVideo();
+            }catch(e){
+               alert("Pause error: " + e);
+            }
 
         }else{
 
-            player.playVideo()
-            showPauseIcon()
+            alert("Playing video");
 
-            setTimeout(()=>{
-                centerControl.style.display="none"
-            },500)
+            try{
+                playVideo();
+            }catch(e){
+                alert("Play error: " + e);
+            }
         }
     }
 
@@ -355,6 +372,9 @@
 
     overlay.addEventListener("touchstart",function(e){
         startY = e.touches[0].clientY
+        if(!isUnmuted){
+            unlockAudio()
+        }
     })
 
     overlay.addEventListener("touchend",function(e){
@@ -425,6 +445,46 @@
         }catch(e){
             console.log("unlock failed");
         }
+    }
+
+    function unlockAudio(){
+
+        try{
+
+            player.unMute()
+            player.setVolume(100)
+            player.playVideo()
+
+        }catch(e){}
+
+    }
+
+    function playVideo(){
+        player.getIframe().contentWindow.postMessage(
+            '{"event":"command","func":"playVideo","args":""}',
+            '*'
+        );
+    }
+
+    function pauseVideo(){
+        player.getIframe().contentWindow.postMessage(
+            '{"event":"command","func":"pauseVideo","args":""}',
+            '*'
+        );
+    }
+
+    function unMuteVideo(){
+        player.getIframe().contentWindow.postMessage(
+            '{"event":"command","func":"unMute","args":""}',
+            '*'
+        );
+    }
+
+    function muteVideo(){
+        player.getIframe().contentWindow.postMessage(
+            '{"event":"command","func":"mute","args":""}',
+            '*'
+        );
     }
 </script>
 
