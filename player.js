@@ -315,6 +315,8 @@ if(isTouchDevice){
 
 }
 
+document.getElementById("player").addEventListener("click", handleTap);
+
 
 
 /*overlay.addEventListener("touchstart",function(e){
