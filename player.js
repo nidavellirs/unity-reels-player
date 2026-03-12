@@ -10,7 +10,7 @@ let lastGestureTime = 0
 const GESTURE_LOCK = 250
 let autoPlayPending = false
 
-let overlay = document.getElementById("overlay")
+let overlay = document.getElementById("player")
 let centerControl = document.getElementById("centerControl")
 
 /* ---------------- API CONFIG ---------------- */
