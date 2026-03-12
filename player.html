@@ -301,8 +301,6 @@
     function handleTap(){
 
         if(!isUnmuted){
-
-            alert("called3");
             player.unMute()
             player.setVolume(100)
 
@@ -361,7 +359,6 @@
     /* ---------------- CLICK DESKTOP ---------------- */
 
     overlay.addEventListener("click",function(){
-        alert("called1");
         let now = Date.now()
         if(now - lastGestureTime < GESTURE_LOCK) return
         lastGestureTime = now
