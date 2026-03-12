@@ -28,7 +28,6 @@
             width:110vw;
             height:110vh;
             transform:translate(-50%,-50%);
-            pointer-events:none;
         }
 
         #overlay{
@@ -343,18 +342,6 @@
         let endY = e.changedTouches[0].clientY
         handleGesture(startY,endY)
     })
-
-   /* overlay.addEventListener("pointerdown",function(e){
-        startY = e.clientY
-    })
-
-    overlay.addEventListener("pointerup",function(e){
-        let now = Date.now()
-        if(now - lastGestureTime < GESTURE_LOCK) return
-        lastGestureTime = now
-
-        handleGesture(startY,e.clientY)
-    })*/
 
     /* ---------------- CLICK DESKTOP ---------------- */
 
