@@ -256,6 +256,8 @@ function handleTap(){
 
         try{
             alert("Playing Video")
+            alert(player.getIframe());
+
             let state = player.getPlayerState()
             alert("Player state: "+state)
             player.playVideo()
