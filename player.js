@@ -22,7 +22,7 @@ const LIMIT = 5
 let cursorId = null
 let loading = false
 
-const AUTH_TOKEN ="Bearer "+"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5ODI2MTI5NDYxIiwiaWF0IjoxNzczMjQzNjg3LCJleHAiOjE3NzMzNjM2ODd9.eey7ApBMsBUcQYF9kFz64hsGEMxfnR4L_O0CM56UQdE9YXAZUrhFty1jk927mTp3osKkXdZ-NL8HtVqfcYDt2Q"
+const AUTH_TOKEN ="Bearer "+"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5ODI2MTI5NDYxIiwiaWF0IjoxNzczMzE3MTQzLCJleHAiOjE3NzM0MzcxNDN9.2VsBbzj9I8McZrSM9h4aA4AwrW1eOcR9EwfK-puYzo4Jxdi6PFZEp6UTAw3T9jldy_0Qx6G5LITkPuxMdrbCHQ"
 
 /* ---------------- API CALL ---------------- */
 
@@ -96,6 +96,7 @@ function createPlayer(){
                     try{
                         player.mute()        // start muted (required for autoplay on mobile/webview)
                         player.playVideo()   // start first video
+                        player.unMute()
                     }catch(err){
                         console.log("Autoplay blocked")
                     }
