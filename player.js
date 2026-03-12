@@ -256,14 +256,14 @@ function handleTap(){
 
         try{
             alert("Playing Video")
-            alert(player.getIframe());
 
             let state = player.getPlayerState()
             alert("Player state: "+state)
-            player.playVideo()
-
+            playVideo();
+            state = player.getPlayerState()
+            alert("Player state: "+state)
             // WebView wake-up fix
-            setTimeout(()=>{
+           /* setTimeout(()=>{
                 try{
                     if(player.getPlayerState() !== YT.PlayerState.PLAYING){
                         player.seekTo(player.getCurrentTime() + 0.01, true)
@@ -273,7 +273,7 @@ function handleTap(){
                         alert("Player state: "+state)
                     }
                 }catch(e){}
-            },200)
+            },200)*/
 
             showPauseIcon()
 
@@ -437,4 +437,33 @@ function updateReelInfo(){
 
     document.getElementById("channelName").innerText = reel.channel.name || "Unknown Channel"
     document.getElementById("reelTitle").innerText = reel.title || ""
+}
+
+function playVideo(){
+    player.getIframe().contentWindow.postMessage(
+        '{"event":"command","func":"playVideo","args":""}',
+        '*'
+    );
+    alert("postMessage - playVideo")
+}
+
+function pauseVideo(){
+    player.getIframe().contentWindow.postMessage(
+        '{"event":"command","func":"pauseVideo","args":""}',
+        '*'
+    );
+}
+
+function unMuteVideo(){
+    player.getIframe().contentWindow.postMessage(
+        '{"event":"command","func":"unMute","args":""}',
+        '*'
+    );
+}
+
+function muteVideo(){
+    player.getIframe().contentWindow.postMessage(
+        '{"event":"command","func":"mute","args":""}',
+        '*'
+    );
 }
