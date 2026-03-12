@@ -236,7 +236,6 @@ function handleTap(){
 
         isUnmuted = true
         document.getElementById("tapSound").style.display="none"
-        alert("Sound enabled3")
 
         if(player.getPlayerState() === YT.PlayerState.PAUSED){
             player.playVideo()
@@ -248,32 +247,25 @@ function handleTap(){
     let state = player.getPlayerState()
 
     if(state === YT.PlayerState.PLAYING){
-        alert("Pausing Video")
         player.pauseVideo()
         showPlayIcon()
     }else{
 
 
         try{
-            alert("Playing Video")
-
             let state = player.getPlayerState()
-            alert("Player state: "+state)
-            playVideo();
-            state = player.getPlayerState()
-            alert("Player state: "+state)
+            player.playVideo()
+
             // WebView wake-up fix
-           /* setTimeout(()=>{
+            setTimeout(()=>{
                 try{
                     if(player.getPlayerState() !== YT.PlayerState.PLAYING){
                         player.seekTo(player.getCurrentTime() + 0.01, true)
                         player.playVideo()
-
                         state = player.getPlayerState()
-                        alert("Player state: "+state)
                     }
                 }catch(e){}
-            },200)*/
+            },200)
 
             showPauseIcon()
 
@@ -314,8 +306,6 @@ if(isTouchDevice){
     })
 
 }
-
-document.getElementById("player").addEventListener("click", handleTap);
 
 
 
@@ -439,33 +429,4 @@ function updateReelInfo(){
 
     document.getElementById("channelName").innerText = reel.channel.name || "Unknown Channel"
     document.getElementById("reelTitle").innerText = reel.title || ""
-}
-
-function playVideo(){
-    player.getIframe().contentWindow.postMessage(
-        '{"event":"command","func":"playVideo","args":""}',
-        '*'
-    );
-    alert("postMessage - playVideo")
-}
-
-function pauseVideo(){
-    player.getIframe().contentWindow.postMessage(
-        '{"event":"command","func":"pauseVideo","args":""}',
-        '*'
-    );
-}
-
-function unMuteVideo(){
-    player.getIframe().contentWindow.postMessage(
-        '{"event":"command","func":"unMute","args":""}',
-        '*'
-    );
-}
-
-function muteVideo(){
-    player.getIframe().contentWindow.postMessage(
-        '{"event":"command","func":"mute","args":""}',
-        '*'
-    );
 }
