@@ -96,7 +96,6 @@ function createPlayer(){
                     try{
                         player.mute()        // start muted (required for autoplay on mobile/webview)
                         player.playVideo()   // start first video
-                        player.unMute()
                     }catch(err){
                         console.log("Autoplay blocked")
                     }
@@ -266,7 +265,38 @@ function handleTap(){
 
 /* ---------------- TOUCH EVENTS ---------------- */
 
-overlay.addEventListener("touchstart",function(e){
+const isTouchDevice = 'ontouchstart' in window;
+
+if(isTouchDevice){
+
+    overlay.addEventListener("touchstart", function(e){
+        startY = e.touches[0].clientY
+    })
+
+    overlay.addEventListener("touchend", function(e){
+        let endY = e.changedTouches[0].clientY
+        handleGesture(startY,endY)
+    })
+
+}else{
+
+    overlay.addEventListener("click", function(){
+        handleTap()
+    })
+
+    overlay.addEventListener("wheel", function(e){
+        if(e.deltaY > 0){
+            nextVideo()
+        }else{
+            prevVideo()
+        }
+    })
+
+}
+
+
+
+/*overlay.addEventListener("touchstart",function(e){
     startY = e.touches[0].clientY
 })
 
@@ -277,11 +307,11 @@ overlay.addEventListener("touchend",function(e){
 
     let endY = e.changedTouches[0].clientY
     handleGesture(startY,endY)
-})
+})*/
 
 /* ---------------- CLICK DESKTOP ---------------- */
 
-overlay.addEventListener("click",function(){
+/*overlay.addEventListener("click",function(){
     let now = Date.now()
     if(now - lastGestureTime < GESTURE_LOCK) return
     lastGestureTime = now
@@ -290,7 +320,7 @@ overlay.addEventListener("click",function(){
 
 })
 
-/* ---------------- SCROLL DESKTOP ---------------- */
+/!* ---------------- SCROLL DESKTOP ---------------- *!/
 
 overlay.addEventListener("wheel",function(e){
     if(e.deltaY > 0){
@@ -298,7 +328,7 @@ overlay.addEventListener("wheel",function(e){
     }else{
         prevVideo()
     }
-})
+})*/
 /* ---------------- START APP ---------------- */
 initFeed()
 
