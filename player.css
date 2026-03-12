@@ -1,53 +1,76 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+body{
+    margin:0;
+    background:black;
+    overflow:hidden;
+    font-family:Arial;
 }
 
-body {
-    margin: 0;
-    background: #000;
-    overflow: hidden;
-    font-family: 'Be Vietnam Pro', Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+#player{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:black;
 }
 
-/* ── CENTER CONTAINER — like a phone screen ── */
-#reelPlayer {
-    position: relative;
-    width: 100vh; /* square-ish on desktop, full on mobile */
-    max-width: 420px;
-    height: 100vh;
-    overflow: hidden;
-    background: #000;
-    flex-shrink: 0;
+/* force youtube iframe to cover screen */
+#player iframe{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:110vw;
+    height:110vh;
+    transform:translate(-50%,-50%);
 }
 
-/* ── YOUTUBE PLAYER ── */
-#player {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000;
+#overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    z-index:10;
 }
 
-/* Force iframe to fill the container vertically */
-#player iframe {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    /* 9:16 video in a 9:16 container */
-    width: 100%;
-    height: 100%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
+#tapSound{
+    position:fixed;
+    bottom:40px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,0.7);
+    color:white;
+    padding:10px 16px;
+    border-radius:20px;
+    font-size:14px;
+    z-index:20;
 }
+
+#centerControl{
+    pointer-events:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:55px;
+    height:55px;
+    background:rgba(0,0,0,0.45);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:30;
+    display:none;
+}
+
+#centerControl svg{
+    width:38px;
+    height:38px;
+    fill:white;
+}
+
+/** OVERLAY **/
 
 /* ── UI OVERLAY ── */
 #uiOverlay {
@@ -57,7 +80,6 @@ body {
     width: 100%;
     height: 100%;
     z-index: 10;
-    pointer-events: none;
 }
 
 #uiOverlay .categories,
@@ -79,7 +101,7 @@ body {
 }
 
 .app-logo {
-    height: 32px;
+    height: 54px;
     width: auto;
     object-fit: contain;
     margin-top: 25px;
@@ -158,8 +180,8 @@ body {
 }
 
 .category-item .cat-label {
-    font-size: 10px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 300;
     color: #ffffff;
     text-align: center;
     transition: all 0.2s ease;
@@ -255,48 +277,6 @@ body {
     text-overflow: ellipsis;
 }
 
-.share-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.18);
-    border: 1.5px solid rgba(255,255,255,0.5);
-    border-radius: 20px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 7px 14px;
-    cursor: pointer;
-    flex-shrink: 0;
-    backdrop-filter: blur(6px);
-    font-family: 'Be Vietnam Pro', Arial, sans-serif;
-    pointer-events: all;
-}
-
-.share-btn:active {
-    background: rgba(255,255,255,0.3);
-}
-
-/* ── CENTER PLAY/PAUSE ── */
-#playIcon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 65px;
-    height: 65px;
-    background: rgba(0,0,0,0.45);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    color: white;
-    opacity: 0;
-    transition: opacity 0.2s;
-    pointer-events: none;
-}
-
 /* ── TAP FOR SOUND ── */
 #tapSound {
     position: absolute;
@@ -368,7 +348,7 @@ body {
         border-radius: 0;
     }
 
-    .app-logo { height: 34px; }
+    .app-logo { height: 54px; }
     .top-header { padding: 20px 16px 44px; }
 
     .cat-icon-wrap { width: 44px; height: 44px; }
