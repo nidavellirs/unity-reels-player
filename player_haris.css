@@ -1,0 +1,402 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Be Vietnam Pro', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* ── CENTER CONTAINER — like a phone screen ── */
+#reelPlayer {
+    position: relative;
+    width: 100vh; /* square-ish on desktop, full on mobile */
+    max-width: 420px;
+    height: 100vh;
+    overflow: hidden;
+    background: #000;
+    flex-shrink: 0;
+}
+
+/* ── YOUTUBE PLAYER ── */
+#player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+/* Force iframe to fill the container vertically */
+#player iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* 9:16 video in a 9:16 container */
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+/* ── UI OVERLAY ── */
+#uiOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+#uiOverlay .categories,
+#uiOverlay .top-header {
+    pointer-events: all;
+}
+
+/* ── TOP HEADER ── */
+.top-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px 14px 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+}
+
+.app-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    margin-top: 25px;
+    margin-left: 10px;
+
+}
+
+.app-icon-placeholder {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.app-name {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.app-name span:first-child {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.app-name span:last-child {
+    font-size: 10px;
+    font-weight: 600;
+    color: #f7931e;
+    letter-spacing: 1px;
+}
+
+/* ── RIGHT CATEGORIES ── */
+.categories {
+    position: absolute;
+    right: 10px;
+    top: 65%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    min-width: 54px;
+    border-radius: 20px;
+}
+
+.cat-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(31,32,34,0.4);
+    transition: all 0.2s ease;
+    color: rgba(255,255,255,0.75);
+}
+
+.category-item .cat-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: #ffffff;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+/* Selected */
+/* .category-item.selected {
+    background: rgba(247,147,30,0.2);
+} */
+
+.category-item.selected .cat-icon-wrap {
+    background: #ffffff;
+    color: #000;
+}
+
+.category-item.selected .cat-label {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* .category-item.selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 55%;
+    background: #f7931e;
+    border-radius: 0 3px 3px 0;
+} */
+
+/* ── BOTTOM GRADIENT ── */
+.bottom-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+    pointer-events: none;
+}
+
+/* ── BOTTOM CHANNEL INFO ── */
+.overlay {
+    position: absolute;
+    bottom: 24px;
+    left: 14px;
+    right: 70px;
+}
+
+.bottom-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+}
+.share-btn{
+    margin-left: 30px;
+}
+
+.bottom-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.channel-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.yt-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 6px;
+}
+
+.channel-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.reel-title {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 20px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    backdrop-filter: blur(6px);
+    font-family: 'Be Vietnam Pro', Arial, sans-serif;
+    pointer-events: all;
+}
+
+.share-btn:active {
+    background: rgba(255,255,255,0.3);
+}
+
+/* ── CENTER PLAY/PAUSE ── */
+#playIcon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 65px;
+    height: 65px;
+    background: rgba(0,0,0,0.45);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+/* ── TAP FOR SOUND ── */
+#tapSound {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 20;
+}
+
+/* ── RESPONSIVE ── */
+
+/* Mobile portrait (small phones) */
+@media (max-width: 380px) {
+    .app-logo { height: 26px; }
+    .top-header { padding: 12px 10px 35px; }
+
+    .cat-icon-wrap { width: 34px; height: 34px; }
+    .category-item { padding: 6px 8px; min-width: 46px; }
+    .category-item .cat-label { font-size: 9px; }
+    .categories { gap: 1px; }
+
+    .channel-name { font-size: 13px; }
+    .reel-title { font-size: 12px; }
+    .share-btn { font-size: 12px; padding: 6px 11px; }
+    .yt-icon { width: 34px; height: 24px; }
+    .overlay { bottom: 18px; }
+
+    #tapSound { font-size: 11px; bottom: 80px; }
+}
+
+/* Mobile landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+    #reelPlayer {
+        width: auto;
+        max-width: none;
+        height: 100vh;
+        aspect-ratio: 9/16;
+    }
+
+    .top-header { padding: 8px 10px 20px; }
+    .app-logo { height: 22px; }
+
+    .cat-icon-wrap { width: 28px; height: 28px; }
+    .category-item { padding: 4px 6px; gap: 2px; }
+    .category-item .cat-label { font-size: 8px; }
+    .categories { gap: 0px; top: 50%; }
+
+    .overlay { bottom: 10px; }
+    .channel-name { font-size: 12px; }
+    .reel-title { font-size: 11px; }
+    .share-btn { padding: 5px 10px; font-size: 11px; }
+
+    #tapSound { bottom: 60px; font-size: 11px; }
+}
+
+/* Tablet / large screens */
+@media (min-width: 768px) {
+    #reelPlayer {
+        max-width: 390px;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .app-logo { height: 34px; }
+    .top-header { padding: 20px 16px 44px; }
+
+    .cat-icon-wrap { width: 44px; height: 44px; }
+    .category-item { padding: 9px 11px; min-width: 58px; }
+    .category-item .cat-label { font-size: 11px; }
+
+    .channel-name { font-size: 16px; }
+    .reel-title { font-size: 14px; }
+    .share-btn { font-size: 14px; padding: 8px 16px; }
+    .yt-icon { width: 44px; height: 31px; }
+    .overlay { bottom: 28px; }
+}
+
+/* Desktop large */
+@media (min-width: 1200px) {
+    body { background: #111; }
+    #reelPlayer {
+        max-width: 400px;
+        box-shadow: 0 0 60px rgba(0,0,0,0.8);
+    }
+}
+
+/* Safe area for iPhone notch/home bar */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .overlay {
+        bottom: calc(24px + env(safe-area-inset-bottom));
+    }
+    .top-header {
+        padding-top: calc(16px + env(safe-area-inset-top));
+    }
+}
