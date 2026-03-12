@@ -231,20 +231,17 @@ function showPauseIcon(){
 function handleTap(){
 
     if(!isUnmuted){
-
         player.unMute()
         player.setVolume(100)
-
-        // important for Android WebView
-        setTimeout(()=>{
-            try{
-                player.playVideo()
-            }catch(e){}
-        },250)
 
         isUnmuted = true
         document.getElementById("tapSound").style.display="none"
         alert("Sound enabled3")
+
+        if(player.getPlayerState() === YT.PlayerState.PAUSED){
+            player.playVideo()
+        }
+
         return
     }
 
@@ -252,30 +249,17 @@ function handleTap(){
 
     if(state === YT.PlayerState.PLAYING){
         alert("Pausing Video")
-        setTimeout(()=>{
-            try{
-                player.pauseVideo()
-                showPlayIcon()
-            }catch(e){}
-        },250)
-
-
+        player.pauseVideo()
+        showPlayIcon()
     }else{
         alert("Playing Video")
 
-        setTimeout(()=>{
-            try{
-
-                let state = player.getPlayerState()
-                alert("Player state: "+state)
-                player.playVideo()
-                state = player.getPlayerState()
-                alert("Player state: "+state)
-                showPauseIcon()
-            }catch(e){}
-        },250)
-
-
+        let state = player.getPlayerState()
+        alert("Player state: "+state)
+        player.playVideo()
+        state = player.getPlayerState()
+        alert("Player state: "+state)
+        showPauseIcon()
 
         setTimeout(()=>{
             centerControl.style.display="none"
