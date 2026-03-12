@@ -236,7 +236,7 @@ function handleTap(){
         player.setVolume(100)
 
         // important for Android WebView
-        player.playVideo()
+        //player.playVideo()
 
         isUnmuted = true
         document.getElementById("tapSound").style.display="none"
