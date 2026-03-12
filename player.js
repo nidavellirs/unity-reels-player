@@ -106,7 +106,7 @@ function createPlayer(){
                     nextVideo()
                 }
 
-                if(e.data === YT.PlayerState.CUED && autoPlayPending){
+                /*if(e.data === YT.PlayerState.CUED && autoPlayPending){
 
                     autoPlayPending = false
 
@@ -123,7 +123,7 @@ function createPlayer(){
 
                     }catch(err){}
 
-                }
+                }*/
             }
         }
     })
@@ -236,26 +236,42 @@ function handleTap(){
         player.setVolume(100)
 
         // important for Android WebView
-        //player.playVideo()
+        setTimeout(()=>{
+            try{
+                player.playVideo()
+            }catch(e){}
+        },250)
 
         isUnmuted = true
         document.getElementById("tapSound").style.display="none"
-        alert("Sound enabled1")
+        alert("Sound enabled3")
         return
     }
 
     let state = player.getPlayerState()
 
-
+    alert("Player state: "+state)
     if(state === YT.PlayerState.PLAYING){
         alert("Pausing Video")
-        player.pauseVideo()
-        showPlayIcon()
+        setTimeout(()=>{
+            try{
+                player.pauseVideo()
+                showPlayIcon()
+            }catch(e){}
+        },250)
+
 
     }else{
         alert("Playing Video")
-        player.playVideo()
-        showPauseIcon()
+
+        setTimeout(()=>{
+            try{
+                player.playVideo()
+                showPauseIcon()
+            }catch(e){}
+        },250)
+
+
 
         setTimeout(()=>{
             centerControl.style.display="none"
