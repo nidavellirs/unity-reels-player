@@ -92,8 +92,9 @@ function createPlayer(){
             modestbranding:1,
             rel:0,
             playsinline:1,
-            showinfo:0,
-            iv_load_policy:3,
+            enablejsapi:1,
+            origin: window.location.origin,
+            widget_referrer: window.location.origin,
             fs:0,
             disablekb:1
         },
@@ -170,13 +171,13 @@ function nextVideo(){
         try{
             updateReelInfo()
             player.mute()
-            player.cueVideoById({
+           /* player.cueVideoById({
                 videoId: reels[currentIndex].videoId,
                 startSeconds: 0,
                 suggestedQuality: "large"
-            })
+            })*/
 
-            //player.cueVideoById(reels[currentIndex].videoId)
+            player.cueVideoById(reels[currentIndex].videoId)
         }catch(e){}
 
         setTimeout(()=>{
@@ -213,13 +214,13 @@ function prevVideo(){
         try{
             updateReelInfo()
             player.mute()
-            player.cueVideoById({
+            /*player.cueVideoById({
                 videoId: reels[currentIndex].videoId,
                 startSeconds: 0,
                 suggestedQuality: "large"
-            })
+            })*/
 
-            //player.cueVideoById(reels[currentIndex].videoId)
+            player.cueVideoById(reels[currentIndex].videoId)
         }catch(e){}
 
         setTimeout(()=>{
