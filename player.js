@@ -102,6 +102,9 @@ function createPlayer(){
                 },300)
             },
             onStateChange:function(e){
+                if(e.data === YT.PlayerState.PLAYING  || e.data === YT.PlayerState.CUED){
+                    centerControl.style.display = "none"
+                }
                 if(e.data === YT.PlayerState.ENDED){
                     nextVideo()
                 }
@@ -391,6 +394,7 @@ async function reloadFeed(){
     loading = false
 
 
+    centerControl.style.display = "none"
     await fetchReels()
 
     if(reels.length === 0){
