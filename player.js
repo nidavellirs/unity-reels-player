@@ -44,6 +44,13 @@ async function fetchReels(){
             }
         })
 
+        if(res.status === 401){
+
+            showSessionExpiredDialog()
+            loading = false
+            return
+        }
+
         const json = await res.json()
         const newReels = json.data.reels
         reels.push(...newReels);
@@ -451,4 +458,13 @@ function updateReelInfo(){
 
     document.getElementById("channelName").innerText = reel.channel.name || "Unknown Channel"
     document.getElementById("reelTitle").innerText = reel.title || ""
+}
+
+function showSessionExpiredDialog(){
+    document.getElementById("sessionDialog").style.display="flex"
+}
+
+function reLogin(){
+    //window.location.href="/login"
+    // Trigger Unity Function
 }
