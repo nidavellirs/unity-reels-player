@@ -1,4 +1,6 @@
 
+const AUTH_TOKEN = window.APP_TOKEN;
+
 let player
 let currentIndex = 0
 let reels=[];
@@ -22,7 +24,7 @@ const LIMIT = 5
 let cursorId = null
 let loading = false
 
-const AUTH_TOKEN ="Bearer "+"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5ODI2MTI5NDYxIiwiaWF0IjoxNzczMzE3MTQzLCJleHAiOjE3NzM0MzcxNDN9.2VsBbzj9I8McZrSM9h4aA4AwrW1eOcR9EwfK-puYzo4Jxdi6PFZEp6UTAw3T9jldy_0Qx6G5LITkPuxMdrbCHQ"
+
 
 /* ---------------- API CALL ---------------- */
 
@@ -40,7 +42,7 @@ async function fetchReels(){
     try{
         const res = await fetch(url,{
             headers:{
-                "Authorization":AUTH_TOKEN
+                "Authorization":"Bearer "+AUTH_TOKEN
             }
         })
 
@@ -467,4 +469,8 @@ function showSessionExpiredDialog(){
 function reLogin(){
     //window.location.href="/login"
     // Trigger Unity Function
+    Unity.call(JSON.stringify({
+        action: "logout"
+    }));
+
 }
