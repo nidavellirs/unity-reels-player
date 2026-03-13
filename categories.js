@@ -38,7 +38,7 @@ const ICONS = {
 
 /* ── CATEGORIES ── */
 const CATEGORIES = [
-    { id: "mixed", label: "Mixed", categoryId: "" },
+    { id: "mixed", label: "All", categoryId: "" },
     { id: "darshan", label: "Darshan", categoryId: "69a4535974128f436f700de7" },
     { id: "pravachan", label: "Pravachan", categoryId: "69a453d474128f436f70144e" },
     { id: "bhajan", label: "Bhajan", categoryId: "69a4515e74128f436f6fef03" },

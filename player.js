@@ -102,11 +102,15 @@ function createPlayer(){
                 },300)
             },
             onStateChange:function(e){
-                if(e.data === YT.PlayerState.PLAYING  || e.data === YT.PlayerState.CUED){
+                if(e.data === YT.PlayerState.PLAYING ){
                     centerControl.style.display = "none"
                 }
                 if(e.data === YT.PlayerState.ENDED){
                     nextVideo()
+                }
+                if(e.data === YT.PlayerState.CUED){
+                    player.playVideo()
+                    centerControl.style.display = "none"
                 }
 
                 /*if(e.data === YT.PlayerState.CUED && autoPlayPending){
@@ -156,7 +160,14 @@ function nextVideo(){
 
         try{
             updateReelInfo()
-            player.loadVideoById(reels[currentIndex].videoId)
+            player.mute()
+            player.cueVideoById({
+                videoId: reels[currentIndex].videoId,
+                startSeconds: 0,
+                suggestedQuality: "large"
+            })
+
+            //player.cueVideoById(reels[currentIndex].videoId)
         }catch(e){}
 
         setTimeout(()=>{
@@ -192,7 +203,14 @@ function prevVideo(){
 
         try{
             updateReelInfo()
-            player.loadVideoById(reels[currentIndex].videoId)
+            player.mute()
+            player.cueVideoById({
+                videoId: reels[currentIndex].videoId,
+                startSeconds: 0,
+                suggestedQuality: "large"
+            })
+
+            //player.cueVideoById(reels[currentIndex].videoId)
         }catch(e){}
 
         setTimeout(()=>{
