@@ -1,5 +1,8 @@
 
+const params = new URLSearchParams(window.location.search);
+const token = params.get("token");
 
+let AUTH_TOKEN = token;
 
 let player
 let currentIndex = 0
@@ -27,11 +30,11 @@ let loading = false
 
 
 /* ---------------- API CALL ---------------- */
-let AUTH_TOKEN=null;
+
 async function fetchReels(){
     if(loading)
         return
-
+    alert(token);
     loading = true
     let url = `${API_URL}?categoryId=${categoryId}&limit=${LIMIT}`
 
