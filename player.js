@@ -19,7 +19,7 @@ let centerControl = document.getElementById("centerControl")
 
 /* ---------------- API CONFIG ---------------- */
 
-const API_URL = "https://growonlinked.in/reels/feeds"
+const API_URL = "https://growonlinked.in"
 let categoryId = "";
 const LIMIT = 5
 
@@ -41,10 +41,10 @@ async function fetchReels(){
         return
 
     loading = true
-    let url = `${API_URL}?categoryId=${categoryId}&limit=${LIMIT}`
+    let url = API_URL+"/reels/feeds?categoryId="+categoryId+"&limit="+LIMIT;
 
     if(cursorId){
-        url += `&cursorId=${cursorId}`
+        url += "&cursorId="+cursorId
     }
 
     try{
@@ -122,9 +122,14 @@ function createPlayer(){
             onStateChange:function(e){
                 if(e.data === YT.PlayerState.PLAYING ){
                     centerControl.style.display = "none"
+                    startWatchTracking()
                 }
                 if(e.data === YT.PlayerState.ENDED){
+                    stopWatchTracking()
                     nextVideo()
+                }
+                if(e.data === YT.PlayerState.PAUSED){
+                    stopWatchTracking()
                 }
                 if(e.data === YT.PlayerState.CUED){
                     player.playVideo()
@@ -434,4 +439,86 @@ function reLogin(){
 }
 function logout(){
     window.location.href = "uniwebview://logout";
+}
+
+
+/* -------- WATCH TRACKING -------- */
+
+let watchTimer = null
+let viewSentForCurrentReel = false
+const WATCH_THRESHOLD_PERCENT = 50
+const WATCH_THRESHOLD_SECONDS = 3
+
+
+function startWatchTracking(){
+
+    stopWatchTracking()
+
+    viewSentForCurrentReel = false
+
+    watchTimer = setInterval(()=>{
+
+        try{
+
+            if(!player || !reels[currentIndex]) return
+
+            const currentTime = player.getCurrentTime()
+            const duration = player.getDuration()
+
+            if(!duration || duration === 0) return
+
+            const percent = (currentTime / duration) * 100
+
+            if(
+                !viewSentForCurrentReel &&
+                (
+                    currentTime >= WATCH_THRESHOLD_SECONDS ||
+                    percent >= WATCH_THRESHOLD_PERCENT
+                )
+            ){
+                viewSentForCurrentReel = true
+
+                sendWatchedEvent(reels[currentIndex].id)
+            }
+
+        }catch(e){
+            console.log("watch tracking error",e)
+        }
+
+    },1000)
+
+}
+
+function stopWatchTracking(){
+    if(watchTimer){
+        clearInterval(watchTimer)
+        watchTimer = null
+    }
+}
+
+function sendWatchedEvent(reelId){
+
+    if(!reelId) return
+
+    fetch(API_URL+"/reels/watched",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer "+AUTH_TOKEN
+        },
+        body: JSON.stringify({
+            data:{
+                reelId: reelId
+            }
+        })
+    })
+        .then(res=>{
+            if(!res.ok){
+                console.log("watch API failed")
+            }
+        })
+        .catch(err=>{
+            console.log("watch API error",err)
+        })
+
 }
