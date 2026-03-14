@@ -1,8 +1,7 @@
-
 const params = new URLSearchParams(window.location.search);
-const token = params.get("token");
+const AUTH_TOKEN = params.get("token");
 
-let AUTH_TOKEN = token;
+
 
 let player
 let currentIndex = 0
@@ -32,9 +31,15 @@ let loading = false
 /* ---------------- API CALL ---------------- */
 
 async function fetchReels(){
+
+    if (AUTH_TOKEN===null){
+        showSessionExpiredDialog();
+        return;
+    }
+
     if(loading)
         return
-    alert(token);
+
     loading = true
     let url = `${API_URL}?categoryId=${categoryId}&limit=${LIMIT}`
 
@@ -377,17 +382,7 @@ overlay.addEventListener("wheel",function(e){
     }
 })*/
 /* ---------------- START APP ---------------- */
-
-
-/*   document.body.addEventListener("click",function(){
-
-       if(player){
-           try{
-               player.playVideo()
-           }catch(e){}
-       }
-
-   },{once:true})*/
+initFeed()
 
 function handleGesture(start,end){
 
@@ -405,16 +400,6 @@ function handleGesture(start,end){
     }
 
     handleTap()
-}
-
-
-function unlockPlayer(){
-    try{
-        player.mute();
-        player.playVideo();
-    }catch(e){
-        console.log("unlock failed");
-    }
 }
 
 async function reloadFeed(){
@@ -471,29 +456,8 @@ function showSessionExpiredDialog(){
 }
 
 function reLogin(){
-    //window.location.href="/login"
-    // Trigger Unity Function
     Unity.call(JSON.stringify({
         action: "logout"
     }));
 
 }
-
-function waitForUnityToken() {
-
-    if (window.APP_TOKEN) {
-
-        AUTH_TOKEN = window.APP_TOKEN
-        alert(AUTH_TOKEN);
-        console.log("Token received:", AUTH_TOKEN)
-
-        initFeed()   // start your app only after token arrives
-
-    } else {
-
-        setTimeout(waitForUnityToken, 200)
-
-    }
-}
-
-waitForUnityToken()
