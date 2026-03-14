@@ -78,7 +78,6 @@ async function fetchReels(){
 async function initFeed(){
     buildCategories();
     await fetchReels()
-    //onYouTubeIframeAPIReady()
     if(reels.length === 0){
         console.error("No videos returned from API")
         return
@@ -114,6 +113,7 @@ function createPlayer(){
                     try{
                         player.mute()        // start muted (required for autoplay on mobile/webview)
                         player.playVideo()   // start first video
+                        document.getElementById("loader").style.display = "none";
                     }catch(err){
                         console.log("Autoplay blocked")
                     }
@@ -130,37 +130,11 @@ function createPlayer(){
                     player.playVideo()
                     centerControl.style.display = "none"
                 }
-
-                /*if(e.data === YT.PlayerState.CUED && autoPlayPending){
-
-                    autoPlayPending = false
-
-                    try{
-
-                        player.playVideo()
-
-                        if(isUnmuted){
-                            player.unMute()
-                            player.setVolume(100)
-                        }else{
-                            player.mute()
-                        }
-
-                    }catch(err){}
-
-                }*/
             }
         }
     })
 }
 
-/* ---------------- YOUTUBE PLAYER ---------------- */
-
-function onYouTubeIframeAPIReady(){
-    if(reels.length > 0){
-        createPlayer()
-    }
-}
 
 /* ---------------- VIDEO NAVIGATION ---------------- */
 
