@@ -1,5 +1,5 @@
 
-const AUTH_TOKEN = window.APP_TOKEN;
+
 
 let player
 let currentIndex = 0
@@ -27,7 +27,7 @@ let loading = false
 
 
 /* ---------------- API CALL ---------------- */
-
+let AUTH_TOKEN=null;
 async function fetchReels(){
     if(loading)
         return
@@ -374,7 +374,7 @@ overlay.addEventListener("wheel",function(e){
     }
 })*/
 /* ---------------- START APP ---------------- */
-initFeed()
+
 
 /*   document.body.addEventListener("click",function(){
 
@@ -475,3 +475,22 @@ function reLogin(){
     }));
 
 }
+
+function waitForUnityToken() {
+
+    if (window.APP_TOKEN) {
+
+        AUTH_TOKEN = window.APP_TOKEN
+        alert(AUTH_TOKEN);
+        console.log("Token received:", AUTH_TOKEN)
+
+        initFeed()   // start your app only after token arrives
+
+    } else {
+
+        setTimeout(waitForUnityToken, 200)
+
+    }
+}
+
+waitForUnityToken()
