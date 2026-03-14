@@ -456,8 +456,8 @@ function showSessionExpiredDialog(){
 }
 
 function reLogin(){
-    Unity.call(JSON.stringify({
-        action: "logout"
-    }));
-
+    logout();
+}
+function logout(){
+    window.location.href = "uniwebview://logout";
 }

@@ -34,6 +34,27 @@ const ICONS = {
     mixed: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M5 12C5 12 5 8 9 8C13 8 11 16 15 16C19 16 19 12 19 12C19 12 19 8 15 8C11 8 13 16 9 16C5 16 5 12 5 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`,
+
+    logout: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 8L19 12L15 16" 
+        stroke="currentColor" 
+        stroke-width="1.8" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+        
+    <path d="M19 12H9" 
+        stroke="currentColor" 
+        stroke-width="1.8" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+        
+    <path d="M9 5H6C5.4 5 5 5.4 5 6V18C5 18.6 5.4 19 6 19H9" 
+        stroke="currentColor" 
+        stroke-width="1.8" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+</svg>`,
+
 };
 
 /* ── CATEGORIES ── */
@@ -42,7 +63,8 @@ const CATEGORIES = [
     { id: "darshan", label: "Darshan", categoryId: "69a4535974128f436f700de7" },
     { id: "pravachan", label: "Pravachan", categoryId: "69a453d474128f436f70144e" },
     { id: "bhajan", label: "Bhajan", categoryId: "69a4515e74128f436f6fef03" },
-    { id: "stories", label: "Stories", categoryId: "69a4542b74128f436f701916" }
+    { id: "stories", label: "Stories", categoryId: "69a4542b74128f436f701916" },
+    { id: "logout", label: "Logout", categoryId: "logout" }
 ];
 
 let activeCategory = CATEGORIES[0];
@@ -74,5 +96,10 @@ function selectCategory(cat) {
         el.classList.toggle("selected", el.dataset.id === cat.id);
     });
     categoryId=cat.categoryId;
+    if (categoryId === "logout"){
+        logout();
+        return;
+    }
+
     reloadFeed()
 }
