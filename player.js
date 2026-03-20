@@ -69,6 +69,7 @@ async function fetchReels(){
 
     }catch(e){
         console.error("API error", e)
+        showSessionExpiredDialog()
     }
     loading = false
 }
@@ -432,6 +433,7 @@ function updateReelInfo(){
 
 function showSessionExpiredDialog(){
     document.getElementById("sessionDialog").style.display="flex"
+    document.getElementById("loader").style.display = "none";
 }
 
 function reLogin(){
