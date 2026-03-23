@@ -155,9 +155,14 @@ function create(id, videoId, autoplay=false){
                 if(id === positions[2] && e.data === YT.PlayerState.PLAYING){
                     hideThumb()
                     centerControl.style.display = "none"
+                    startWatchTracking()
                 }
                 if(id === positions[2] && e.data === YT.PlayerState.ENDED){
                     nextVideo()
+                    stopWatchTracking()
+                }
+                if(e.data === YT.PlayerState.PAUSED){
+                    stopWatchTracking()
                 }
             },
             onError:(e)=>{
@@ -388,7 +393,6 @@ async function reloadFeed(){
     centerControl.style.display = "none"
     document.getElementById("thumb").style.opacity = "0"
 
-    /* ---------- FETCH NEW DATA ---------- */
 
     await fetchReels()
 
@@ -397,9 +401,6 @@ async function reloadFeed(){
         return
     }
 
-    /* ---------- RESET PLAYERS ---------- */
-
-    // 🔥 destroy old players (VERY IMPORTANT)
     Object.values(players).forEach(p=>{
         try{
             p.destroy()
@@ -407,16 +408,88 @@ async function reloadFeed(){
     })
 
     players = {}
-
-    /* ---------- RESET POSITIONS ---------- */
-
     positions = ["p2","p1","current","n1","n2"]
-
-    /* ---------- RE-INIT PLAYERS ---------- */
-
     initPlayers()
-
-    /* ---------- RESET UI ---------- */
-
     updateReelInfo?.() // safe call if exists
+}
+
+/* -------- WATCH TRACKING -------- */
+
+let watchTimer = null
+let viewSentForCurrentReel = false
+const WATCH_THRESHOLD_PERCENT = 50
+const WATCH_THRESHOLD_SECONDS = 3
+
+
+function startWatchTracking(){
+
+    stopWatchTracking()
+
+    viewSentForCurrentReel = false
+
+    watchTimer = setInterval(()=>{
+
+        try{
+
+            if(!player || !reels[currentIndex]) return
+
+            const currentTime = player.getCurrentTime()
+            const duration = player.getDuration()
+
+            if(!duration || duration === 0) return
+
+            const percent = (currentTime / duration) * 100
+
+            if(
+                !viewSentForCurrentReel &&
+                (
+                    currentTime >= WATCH_THRESHOLD_SECONDS ||
+                    percent >= WATCH_THRESHOLD_PERCENT
+                )
+            ){
+                viewSentForCurrentReel = true
+
+                sendWatchedEvent(reels[currentIndex].id)
+            }
+
+        }catch(e){
+            console.log("watch tracking error",e)
+        }
+
+    },1000)
+
+}
+
+function stopWatchTracking(){
+    if(watchTimer){
+        clearInterval(watchTimer)
+        watchTimer = null
+    }
+}
+
+function sendWatchedEvent(reelId){
+
+    if(!reelId) return
+
+    fetch(API_URL+"/reels/watched",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer "+AUTH_TOKEN
+        },
+        body: JSON.stringify({
+            data:{
+                reelId: reelId
+            }
+        })
+    })
+        .then(res=>{
+            if(!res.ok){
+                console.log("watch API failed")
+            }
+        })
+        .catch(err=>{
+            console.log("watch API error",err)
+        })
+
 }
