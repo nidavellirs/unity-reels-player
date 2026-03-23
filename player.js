@@ -1,34 +1,24 @@
-const params = new URLSearchParams(window.location.search);
-const AUTH_TOKEN = params.get("token");
-
-
-
-let player
-let currentIndex = 0
-let reels=[];
-let isPlaying = false
-
-let isUnmuted = false
-let startY = 0
-let lastGestureTime = 0
-const GESTURE_LOCK = 250
-let autoPlayPending = false
-
-let overlay = document.getElementById("playerContainer")
-let centerControl = document.getElementById("centerControl")
-
-/* ---------------- API CONFIG ---------------- */
+/* ---------------- CONFIG ---------------- */
 
 const API_URL = "https://growonlinked.in"
-let categoryId = "";
 const LIMIT = 5
+let categoryId = "";
+const params = new URLSearchParams(window.location.search)
+const AUTH_TOKEN = params.get("token")
 
+/* ---------------- STATE ---------------- */
+
+let reels = []
+let currentIndex = 0
 let cursorId = null
 let loading = false
 
+let players = {}
+let positions = ["p2","p1","current","n1","n2"]
 
+let isUnmuted = false
 
-/* ---------------- API CALL ---------------- */
+/* ---------------- API ---------------- */
 
 async function fetchReels(){
 
@@ -37,14 +27,13 @@ async function fetchReels(){
         return;
     }
 
-    if(loading)
-        return
+    if(loading) return
 
     loading = true
-    let url = API_URL+"/reels/feeds?categoryId="+categoryId+"&limit="+LIMIT;
 
+    let url = API_URL+"/reels/feeds?categoryId="+categoryId+"&limit="+LIMIT;
     if(cursorId){
-        url += "&cursorId="+cursorId
+        url += "&cursorId=" + cursorId
     }
 
     try{
@@ -55,46 +44,74 @@ async function fetchReels(){
         })
 
         if(res.status === 401){
-
             showSessionExpiredDialog()
             loading = false
             return
         }
 
         const json = await res.json()
-        const newReels = json.data.reels
-        reels.push(...newReels);
+
+        reels.push(...(json.data.reels || []))
         cursorId = json.data.cursorId
-        console.log("Loaded reels:", reels.length)
+
+        console.log("Reels:", reels.length)
 
     }catch(e){
-        console.error("API error", e)
+        console.error(e)
         showSessionExpiredDialog()
     }
+
     loading = false
 }
 
-/* ---------------- INITIAL LOAD ---------------- */
+/* ---------------- INIT ---------------- */
 
 async function initFeed(){
     buildCategories();
     await fetchReels()
+
     if(reels.length === 0){
-        console.error("No videos returned from API")
+        console.error("No reels")
         return
     }
+
     if(window.YT && YT.Player){
-        createPlayer()
+        initPlayers()
     }
 }
 
-/* -------------- CREATE PLAYER --------------------*/
+function onYouTubeIframeAPIReady(){
+    initFeed()
+}
 
-function createPlayer(){
-    player = new YT.Player('player',{
-        videoId: reels[currentIndex].videoId,
-        playerVars: {
-            autoplay:1,
+/* ---------------- HELPERS ---------------- */
+
+function getVideoId(i){
+    if(i < 0 || i >= reels.length) return ""
+    return reels[i]?.videoId || ""
+}
+
+/* ---------------- PLAYER INIT ---------------- */
+
+function initPlayers(){
+
+    players.p2 = create("p2", null)
+    players.p1 = create("p1", null)
+
+    players.current = create("current", getVideoId(0), true)
+
+    players.n1 = create("n1", getVideoId(1))
+    players.n2 = create("n2", getVideoId(2))
+
+    updatePositions()
+}
+
+function create(id, videoId, autoplay=false){
+
+    return new YT.Player(id,{
+        videoId: videoId || "",
+        playerVars:{
+            autoplay: autoplay ? 1 : 0,
             mute:1,
             controls:0,
             modestbranding:1,
@@ -107,318 +124,245 @@ function createPlayer(){
             disablekb:1
         },
         events:{
-            onReady:function(e){
-                player = e.target
-                updateReelInfo()
-                setTimeout(()=>{
-                    try{
-                        player.mute()        // start muted (required for autoplay on mobile/webview)
-                        player.playVideo()   // start first video
-                        document.getElementById("loader").style.display = "none";
-                    }catch(err){
-                        console.log("Autoplay blocked")
-                    }
-                },300)
-            },
-            onStateChange:function(e){
-                if(e.data === YT.PlayerState.PLAYING ){
-                    centerControl.style.display = "none"
-                    startWatchTracking()
+            onReady:(e)=>{
+                if(autoplay && videoId){
+
+                    let p = e.target
+
+                    p.mute() // always start muted
+
+                    setTimeout(()=>{
+                        p.playVideo()
+
+                        // 🔥 FIX: reapply unmute if user already enabled
+                        if(isUnmuted){
+                            try{
+                                p.unMute()
+                                p.setVolume(100)
+                            }catch(err){}
+                        }
+
+                    },100)
+
+
+                    updateReelInfo()
+                    //e.target.playVideo()
+                    document.getElementById("loader").style.display = "none";
+                    document.getElementById("container").style.display = "block";
                 }
-                if(e.data === YT.PlayerState.ENDED){
-                    stopWatchTracking()
+            },
+            onStateChange:(e)=>{
+                if(id === positions[2] && e.data === YT.PlayerState.PLAYING){
+                    hideThumb()
+                    centerControl.style.display = "none"
+                }
+                if(id === positions[2] && e.data === YT.PlayerState.ENDED){
                     nextVideo()
                 }
-                if(e.data === YT.PlayerState.PAUSED){
-                    stopWatchTracking()
-                }
-                if(e.data === YT.PlayerState.CUED){
-                    player.playVideo()
-                    centerControl.style.display = "none"
-                }
+            },
+            onError:(e)=>{
+                document.getElementById("thumb").style.display = "none";
             }
         }
     })
 }
 
+/* ---------------- POSITION ---------------- */
 
-/* ---------------- VIDEO NAVIGATION ---------------- */
+function updatePositions(){
+    document.getElementById(positions[0]).style.transform = "translateY(-200%)"
+    document.getElementById(positions[1]).style.transform = "translateY(-100%)"
+    document.getElementById(positions[2]).style.transform = "translateY(0)"
+    document.getElementById(positions[3]).style.transform = "translateY(100%)"
+    document.getElementById(positions[4]).style.transform = "translateY(200%)"
+}
+
+/* ---------------- PLAY CONTROL ---------------- */
+
+function playCurrent(){
+
+    let currentPlayer = players[positions[2]]
+
+    Object.values(players).forEach(p=>{
+        try{
+            p.pauseVideo()
+            p.mute()
+        }catch(e){}
+    })
+
+    setTimeout(()=>{
+        try{
+            currentPlayer.seekTo(0,true)
+            currentPlayer.playVideo()
+
+            if(isUnmuted){
+                currentPlayer.unMute()
+                currentPlayer.setVolume(100)
+            }
+        }catch(e){}
+    },50)
+}
+
+/* ---------------- NAVIGATION ---------------- */
 
 function nextVideo(){
 
-    if(currentIndex < reels.length - 1){
+    centerControl.style.display = "none"
 
-        currentIndex++
+    if(currentIndex >= reels.length - 1) return
 
-        centerControl.style.display = "none"
+    currentIndex++
 
-        try{
-            player.stopVideo()   // reset internal player state
-        }catch(e){}
+    showThumb()
 
-        try{
-            updateReelInfo()
-            player.mute()
-           /* player.cueVideoById({
-                videoId: reels[currentIndex].videoId,
-                startSeconds: 0,
-                suggestedQuality: "large"
-            })*/
+    let first = positions.shift()
+    positions.push(first)
+    updateReelInfo()
+    updatePositions()
 
-            player.cueVideoById(reels[currentIndex].videoId)
-        }catch(e){}
+    let newVideo = getVideoId(currentIndex + 2)
+    if(newVideo){
+        players[positions[4]].loadVideoById(newVideo)
+    }
 
-        setTimeout(()=>{
-            try{
-                player.playVideo()
-            }catch(e){}
-        },250)
+    playCurrent()
 
-        if(isUnmuted){
-            player.unMute()
-            player.setVolume(100)
-        }else{
-            player.mute()
-        }
-
-        if(!loading && reels.length - currentIndex <= 3){
-            fetchReels()
-        }
+    if(!loading && reels.length - currentIndex <= 3){
+        fetchReels()
     }
 }
 
 function prevVideo(){
 
-    if(currentIndex > 0){
+    centerControl.style.display = "none"
 
-        currentIndex--
+    if(currentIndex <= 0) return
 
-        centerControl.style.display = "none"
+    currentIndex--
 
-        try{
-            player.stopVideo()
-        }catch(e){}
+    showThumb()
 
-        try{
-            updateReelInfo()
-            player.mute()
-            /*player.cueVideoById({
-                videoId: reels[currentIndex].videoId,
-                startSeconds: 0,
-                suggestedQuality: "large"
-            })*/
+    let last = positions.pop()
+    positions.unshift(last)
+    updateReelInfo()
+    updatePositions()
 
-            player.cueVideoById(reels[currentIndex].videoId)
-        }catch(e){}
-
-        setTimeout(()=>{
-            try{
-                player.playVideo()
-            }catch(e){}
-        },250)
-
-        if(isUnmuted){
-            player.unMute()
-            player.setVolume(100)
-        }else{
-            player.mute()
-        }
+    let newVideo = getVideoId(currentIndex - 2)
+    if(newVideo){
+        players[positions[0]].loadVideoById(newVideo)
     }
+
+    playCurrent()
 }
 
-/* ---------------- ICON UI ---------------- */
+/* ---------------- THUMB ---------------- */
 
-function showPlayIcon(){
+function showThumb(){
+    let id = reels[currentIndex]?.videoId
+    if(!id) return
 
-    centerControl.innerHTML = `
-                <svg viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"></path>
-                </svg>`
-    centerControl.style.display="flex"
+    let t = document.getElementById("thumb")
+    t.src = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`
+    t.style.opacity = "1"
 }
 
-function showPauseIcon(){
-
-    centerControl.innerHTML = `
-                <svg viewBox="0 0 24 24">
-                <path d="M6 5h4v14H6zm8 0h4v14h-4z"></path>
-                </svg>`
-    centerControl.style.display="flex"
+function hideThumb(){
+    document.getElementById("thumb").style.opacity = "0"
 }
 
-/* ---------------- TAP LOGIC ---------------- */
+/* ---------------- TAP ---------------- */
+
 function handleTap(){
 
+    let currentPlayer = players[positions[2]]
+
     if(!isUnmuted){
-        player.unMute()
-        player.setVolume(100)
-
         isUnmuted = true
-        document.getElementById("tapSound").style.display="none"
+        document.getElementById("tap").style.display="none"
 
-        if(player.getPlayerState() === YT.PlayerState.PAUSED){
-            player.playVideo()
-        }
-
+        currentPlayer.unMute()
+        currentPlayer.setVolume(100)
+        currentPlayer.playVideo()
         return
     }
 
-    let state = player.getPlayerState()
+    let state = currentPlayer.getPlayerState()
 
     if(state === YT.PlayerState.PLAYING){
-        player.pauseVideo()
+        currentPlayer.pauseVideo()
         showPlayIcon()
     }else{
+        currentPlayer.playVideo()
+        showPauseIcon()
 
-
-        try{
-            let state = player.getPlayerState()
-            player.playVideo()
-
-            // WebView wake-up fix
-            setTimeout(()=>{
-                try{
-                    if(player.getPlayerState() !== YT.PlayerState.PLAYING){
-                        player.seekTo(player.getCurrentTime() + 0.01, true)
-                        player.playVideo()
-                        state = player.getPlayerState()
-                    }
-                }catch(e){}
-            },200)
-
-            showPauseIcon()
-
-        }catch(e){}
         setTimeout(()=>{
             centerControl.style.display="none"
         },800)
     }
 }
 
-/* ---------------- TOUCH EVENTS ---------------- */
+/* ---------------- ICONS ---------------- */
 
-const isTouchDevice = 'ontouchstart' in window;
-
-if(isTouchDevice){
-
-    overlay.addEventListener("touchstart", function(e){
-        startY = e.touches[0].clientY
-    })
-
-    overlay.addEventListener("touchend", function(e){
-        let endY = e.changedTouches[0].clientY
-        handleGesture(startY,endY)
-    })
-
-}else{
-
-    overlay.addEventListener("click", function(){
-        handleTap()
-    })
-
-    overlay.addEventListener("wheel", function(e){
-        if(e.deltaY > 0){
-            nextVideo()
-        }else{
-            prevVideo()
-        }
-    })
-
+function showPlayIcon(){
+    centerControl.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>`
+    centerControl.style.display="flex"
 }
 
+function showPauseIcon(){
+    centerControl.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"></path></svg>`
+    centerControl.style.display="flex"
+}
 
+/* ---------------- SWIPE ---------------- */
 
-/*overlay.addEventListener("touchstart",function(e){
+let startY = 0
+let lastGesture = 0
+
+window.addEventListener("touchstart", e=>{
     startY = e.touches[0].clientY
 })
 
-overlay.addEventListener("touchend",function(e){
+window.addEventListener("touchend", e=>{
+
     let now = Date.now()
-    if(now - lastGestureTime < GESTURE_LOCK) return
-    lastGestureTime = now
+    if(now - lastGesture < 300) return
+    lastGesture = now
 
     let endY = e.changedTouches[0].clientY
-    handleGesture(startY,endY)
-})*/
+    let diff = startY - endY
 
-/* ---------------- CLICK DESKTOP ---------------- */
-
-/*overlay.addEventListener("click",function(){
-    let now = Date.now()
-    if(now - lastGestureTime < GESTURE_LOCK) return
-    lastGestureTime = now
-
-    handleTap()
-
-})
-
-/!* ---------------- SCROLL DESKTOP ---------------- *!/
-
-overlay.addEventListener("wheel",function(e){
-    if(e.deltaY > 0){
-        nextVideo()
-    }else{
-        prevVideo()
-    }
-})*/
-/* ---------------- START APP ---------------- */
-initFeed()
-
-function handleGesture(start,end){
-
-    let diff = start - end
-
-    if(Math.abs(diff) > 90){
-
+    if(Math.abs(diff) > 80){
         if(diff > 0){
             nextVideo()
         }else{
             prevVideo()
         }
-
-        return
+    }else{
+        handleTap()
     }
+})
 
-    handleTap()
+/* desktop */
+window.addEventListener("wheel", e=>{
+    if(e.deltaY > 0){
+        nextVideo()
+    }else{
+        prevVideo()
+    }
+})
+
+
+function showSessionExpiredDialog(){
+    document.getElementById("sessionDialog").style.display="flex"
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("tap").style.display = "none";
 }
 
-async function reloadFeed(){
-    // reset feed state
-    reels=[];
-    cursorId = null
-    currentIndex = 0
-    loading = false
-
-
-    centerControl.style.display = "none"
-    await fetchReels()
-
-    if(reels.length === 0){
-        console.error("No reels for category")
-        return
-    }
-
-    updateReelInfo()
-    // if player already exists -> load new first video
-    if(player){
-        try{
-            player.stopVideo()
-            player.loadVideoById(reels[0].videoId)
-            player.playVideo()
-
-            if(isUnmuted){
-                player.unMute()
-                player.setVolume(100)
-            }else{
-                player.mute()
-            }
-
-        }catch(e){
-            console.log("Player reload error",e)
-        }
-    }else{
-        createPlayer()
-    }
+function reLogin(){
+    logout();
+}
+function logout(){
+    window.location.href = "uniwebview://logout";
 }
 
 function updateReelInfo(){
@@ -431,96 +375,48 @@ function updateReelInfo(){
     document.getElementById("reelTitle").innerText = reel.title || ""
 }
 
-function showSessionExpiredDialog(){
-    document.getElementById("sessionDialog").style.display="flex"
-    document.getElementById("loader").style.display = "none";
-}
 
-function reLogin(){
-    logout();
-}
-function logout(){
-    window.location.href = "uniwebview://logout";
-}
+async function reloadFeed(){
 
+    /* ---------- RESET STATE ---------- */
 
-/* -------- WATCH TRACKING -------- */
+    reels = []
+    cursorId = null
+    currentIndex = 0
+    loading = false
 
-let watchTimer = null
-let viewSentForCurrentReel = false
-const WATCH_THRESHOLD_PERCENT = 50
-const WATCH_THRESHOLD_SECONDS = 3
+    centerControl.style.display = "none"
+    document.getElementById("thumb").style.opacity = "0"
 
+    /* ---------- FETCH NEW DATA ---------- */
 
-function startWatchTracking(){
+    await fetchReels()
 
-    stopWatchTracking()
-
-    viewSentForCurrentReel = false
-
-    watchTimer = setInterval(()=>{
-
-        try{
-
-            if(!player || !reels[currentIndex]) return
-
-            const currentTime = player.getCurrentTime()
-            const duration = player.getDuration()
-
-            if(!duration || duration === 0) return
-
-            const percent = (currentTime / duration) * 100
-
-            if(
-                !viewSentForCurrentReel &&
-                (
-                    currentTime >= WATCH_THRESHOLD_SECONDS ||
-                    percent >= WATCH_THRESHOLD_PERCENT
-                )
-            ){
-                viewSentForCurrentReel = true
-
-                sendWatchedEvent(reels[currentIndex].id)
-            }
-
-        }catch(e){
-            console.log("watch tracking error",e)
-        }
-
-    },1000)
-
-}
-
-function stopWatchTracking(){
-    if(watchTimer){
-        clearInterval(watchTimer)
-        watchTimer = null
+    if(reels.length === 0){
+        console.error("No reels for category")
+        return
     }
-}
 
-function sendWatchedEvent(reelId){
+    /* ---------- RESET PLAYERS ---------- */
 
-    if(!reelId) return
-
-    fetch(API_URL+"/reels/watched",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json",
-            "Authorization":"Bearer "+AUTH_TOKEN
-        },
-        body: JSON.stringify({
-            data:{
-                reelId: reelId
-            }
-        })
+    // 🔥 destroy old players (VERY IMPORTANT)
+    Object.values(players).forEach(p=>{
+        try{
+            p.destroy()
+        }catch(e){}
     })
-        .then(res=>{
-            if(!res.ok){
-                console.log("watch API failed")
-            }
-        })
-        .catch(err=>{
-            console.log("watch API error",err)
-        })
 
+    players = {}
+
+    /* ---------- RESET POSITIONS ---------- */
+
+    positions = ["p2","p1","current","n1","n2"]
+
+    /* ---------- RE-INIT PLAYERS ---------- */
+
+    initPlayers()
+
+    /* ---------- RESET UI ---------- */
+
+    updateReelInfo?.() // safe call if exists
 }

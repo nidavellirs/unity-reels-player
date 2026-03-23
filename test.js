@@ -1,0 +1,527 @@
+const params = new URLSearchParams(window.location.search);
+const AUTH_TOKEN = params.get("token");
+
+
+
+let player
+let currentIndex = 0
+let reels=[];
+let isPlaying = false
+
+let isUnmuted = false
+let startY = 0
+let lastGestureTime = 0
+const GESTURE_LOCK = 250
+let autoPlayPending = false
+
+let overlay = document.getElementById("playerContainer")
+let centerControl = document.getElementById("centerControl")
+
+/* ---------------- API CONFIG ---------------- */
+
+const API_URL = "https://growonlinked.in"
+let categoryId = "";
+const LIMIT = 5
+
+let cursorId = null
+let loading = false
+
+
+
+/* ---------------- API CALL ---------------- */
+
+async function fetchReels(){
+
+    if (AUTH_TOKEN===null){
+        showSessionExpiredDialog();
+        return;
+    }
+
+    if(loading)
+        return
+
+    loading = true
+    let url = API_URL+"/reels/feeds?categoryId="+categoryId+"&limit="+LIMIT;
+
+    if(cursorId){
+        url += "&cursorId="+cursorId
+    }
+
+    try{
+        const res = await fetch(url,{
+            headers:{
+                "Authorization":"Bearer "+AUTH_TOKEN
+            }
+        })
+
+        if(res.status === 401){
+
+            showSessionExpiredDialog()
+            loading = false
+            return
+        }
+
+        const json = await res.json()
+        const newReels = json.data.reels
+        reels.push(...newReels);
+        cursorId = json.data.cursorId
+        console.log("Loaded reels:", reels.length)
+
+    }catch(e){
+        console.error("API error", e)
+        showSessionExpiredDialog()
+    }
+    loading = false
+}
+
+/* ---------------- INITIAL LOAD ---------------- */
+
+async function initFeed(){
+    buildCategories();
+    await fetchReels()
+    if(reels.length === 0){
+        console.error("No videos returned from API")
+        return
+    }
+    if(window.YT && YT.Player){
+        createPlayer()
+    }
+}
+
+/* -------------- CREATE PLAYER --------------------*/
+
+function createPlayer(){
+    player = new YT.Player('player',{
+        videoId: reels[currentIndex].videoId,
+        playerVars: {
+            autoplay:1,
+            mute:1,
+            controls:0,
+            modestbranding:1,
+            rel:0,
+            playsinline:1,
+            enablejsapi:1,
+            origin: window.location.origin,
+            widget_referrer: window.location.origin,
+            fs:0,
+            disablekb:1
+        },
+        events:{
+            onReady:function(e){
+                player = e.target
+                updateReelInfo()
+                setTimeout(()=>{
+                    try{
+                        player.mute()        // start muted (required for autoplay on mobile/webview)
+                        player.playVideo()   // start first video
+                        document.getElementById("loader").style.display = "none";
+                    }catch(err){
+                        console.log("Autoplay blocked")
+                    }
+                },300)
+            },
+            onStateChange:function(e){
+                if(e.data === YT.PlayerState.PLAYING ){
+                    centerControl.style.display = "none"
+                    centerControl.style.display = "none"
+                    startWatchTracking()
+                }
+                if(e.data === YT.PlayerState.ENDED){
+                    stopWatchTracking()
+                    nextVideo()
+                }
+                if(e.data === YT.PlayerState.PAUSED){
+                    stopWatchTracking()
+                }
+                if(e.data === YT.PlayerState.CUED){
+                    player.playVideo()
+                    centerControl.style.display = "none"
+                }
+            }
+        }
+    })
+}
+
+
+/* ---------------- VIDEO NAVIGATION ---------------- */
+
+function nextVideo(){
+
+    if(currentIndex < reels.length - 1){
+
+        currentIndex++
+
+        centerControl.style.display = "none"
+
+        try{
+            player.stopVideo()   // reset internal player state
+        }catch(e){}
+
+        try{
+            updateReelInfo()
+            player.mute()
+            /* player.cueVideoById({
+                 videoId: reels[currentIndex].videoId,
+                 startSeconds: 0,
+                 suggestedQuality: "large"
+             })*/
+
+            player.cueVideoById(reels[currentIndex].videoId)
+        }catch(e){}
+
+        setTimeout(()=>{
+            try{
+                player.playVideo()
+            }catch(e){}
+        },250)
+
+        if(isUnmuted){
+            player.unMute()
+            player.setVolume(100)
+        }else{
+            player.mute()
+        }
+
+        if(!loading && reels.length - currentIndex <= 3){
+            fetchReels()
+        }
+    }
+}
+
+function prevVideo(){
+
+    if(currentIndex > 0){
+
+        currentIndex--
+
+        centerControl.style.display = "none"
+
+        try{
+            player.stopVideo()
+        }catch(e){}
+
+        try{
+            updateReelInfo()
+            player.mute()
+            /*player.cueVideoById({
+                videoId: reels[currentIndex].videoId,
+                startSeconds: 0,
+                suggestedQuality: "large"
+            })*/
+
+            player.cueVideoById(reels[currentIndex].videoId)
+        }catch(e){}
+
+        setTimeout(()=>{
+            try{
+                player.playVideo()
+            }catch(e){}
+        },250)
+
+        if(isUnmuted){
+            player.unMute()
+            player.setVolume(100)
+        }else{
+            player.mute()
+        }
+    }
+}
+
+/* ---------------- ICON UI ---------------- */
+
+function showPlayIcon(){
+
+    centerControl.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"></path>
+                </svg>`
+    centerControl.style.display="flex"
+}
+
+function showPauseIcon(){
+
+    centerControl.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                <path d="M6 5h4v14H6zm8 0h4v14h-4z"></path>
+                </svg>`
+    centerControl.style.display="flex"
+}
+
+/* ---------------- TAP LOGIC ---------------- */
+function handleTap(){
+
+    if(!isUnmuted){
+        player.unMute()
+        player.setVolume(100)
+
+        isUnmuted = true
+        document.getElementById("tapSound").style.display="none"
+
+        if(player.getPlayerState() === YT.PlayerState.PAUSED){
+            player.playVideo()
+        }
+
+        return
+    }
+
+    let state = player.getPlayerState()
+
+    if(state === YT.PlayerState.PLAYING){
+        player.pauseVideo()
+        showPlayIcon()
+    }else{
+
+
+        try{
+            let state = player.getPlayerState()
+            player.playVideo()
+
+            // WebView wake-up fix
+            setTimeout(()=>{
+                try{
+                    if(player.getPlayerState() !== YT.PlayerState.PLAYING){
+                        player.seekTo(player.getCurrentTime() + 0.01, true)
+                        player.playVideo()
+                        state = player.getPlayerState()
+                    }
+                }catch(e){}
+            },200)
+
+            showPauseIcon()
+
+        }catch(e){}
+        setTimeout(()=>{
+            centerControl.style.display="none"
+        },800)
+    }
+}
+
+/* ---------------- TOUCH EVENTS ---------------- */
+
+const isTouchDevice = 'ontouchstart' in window;
+
+if(isTouchDevice){
+
+    overlay.addEventListener("touchstart", function(e){
+        startY = e.touches[0].clientY
+    })
+
+    overlay.addEventListener("touchend", function(e){
+        let endY = e.changedTouches[0].clientY
+        handleGesture(startY,endY)
+    })
+
+}else{
+
+    overlay.addEventListener("click", function(){
+        handleTap()
+    })
+
+    overlay.addEventListener("wheel", function(e){
+        if(e.deltaY > 0){
+            nextVideo()
+        }else{
+            prevVideo()
+        }
+    })
+
+}
+
+
+
+/*overlay.addEventListener("touchstart",function(e){
+    startY = e.touches[0].clientY
+})
+
+overlay.addEventListener("touchend",function(e){
+    let now = Date.now()
+    if(now - lastGestureTime < GESTURE_LOCK) return
+    lastGestureTime = now
+
+    let endY = e.changedTouches[0].clientY
+    handleGesture(startY,endY)
+})*/
+
+/* ---------------- CLICK DESKTOP ---------------- */
+
+/*overlay.addEventListener("click",function(){
+    let now = Date.now()
+    if(now - lastGestureTime < GESTURE_LOCK) return
+    lastGestureTime = now
+
+    handleTap()
+
+})
+
+/!* ---------------- SCROLL DESKTOP ---------------- *!/
+
+overlay.addEventListener("wheel",function(e){
+    if(e.deltaY > 0){
+        nextVideo()
+    }else{
+        prevVideo()
+    }
+})*/
+/* ---------------- START APP ---------------- */
+initFeed()
+
+function handleGesture(start,end){
+
+    let diff = start - end
+
+    if(Math.abs(diff) > 90){
+
+        if(diff > 0){
+            nextVideo()
+        }else{
+            prevVideo()
+        }
+
+        return
+    }
+
+    handleTap()
+}
+
+async function reloadFeed(){
+    // reset feed state
+    reels=[];
+    cursorId = null
+    currentIndex = 0
+    loading = false
+
+
+    centerControl.style.display = "none"
+    await fetchReels()
+
+    if(reels.length === 0){
+        console.error("No reels for category")
+        return
+    }
+
+    updateReelInfo()
+    // if player already exists -> load new first video
+    if(player){
+        try{
+            player.stopVideo()
+            player.loadVideoById(reels[0].videoId)
+            player.playVideo()
+
+            if(isUnmuted){
+                player.unMute()
+                player.setVolume(100)
+            }else{
+                player.mute()
+            }
+
+        }catch(e){
+            console.log("Player reload error",e)
+        }
+    }else{
+        createPlayer()
+    }
+}
+
+function updateReelInfo(){
+    if(!reels[currentIndex])
+        return
+
+    const reel = reels[currentIndex]
+
+    document.getElementById("channelName").innerText = reel.channel.name || "Unknown Channel"
+    document.getElementById("reelTitle").innerText = reel.title || ""
+}
+
+function showSessionExpiredDialog(){
+    document.getElementById("sessionDialog").style.display="flex"
+    document.getElementById("loader").style.display = "none";
+}
+
+function reLogin(){
+    logout();
+}
+function logout(){
+    window.location.href = "uniwebview://logout";
+}
+
+
+/* -------- WATCH TRACKING -------- */
+
+let watchTimer = null
+let viewSentForCurrentReel = false
+const WATCH_THRESHOLD_PERCENT = 50
+const WATCH_THRESHOLD_SECONDS = 3
+
+
+function startWatchTracking(){
+
+    stopWatchTracking()
+
+    viewSentForCurrentReel = false
+
+    watchTimer = setInterval(()=>{
+
+        try{
+
+            if(!player || !reels[currentIndex]) return
+
+            const currentTime = player.getCurrentTime()
+            const duration = player.getDuration()
+
+            if(!duration || duration === 0) return
+
+            const percent = (currentTime / duration) * 100
+
+            if(
+                !viewSentForCurrentReel &&
+                (
+                    currentTime >= WATCH_THRESHOLD_SECONDS ||
+                    percent >= WATCH_THRESHOLD_PERCENT
+                )
+            ){
+                viewSentForCurrentReel = true
+
+                sendWatchedEvent(reels[currentIndex].id)
+            }
+
+        }catch(e){
+            console.log("watch tracking error",e)
+        }
+
+    },1000)
+
+}
+
+function stopWatchTracking(){
+    if(watchTimer){
+        clearInterval(watchTimer)
+        watchTimer = null
+    }
+}
+
+function sendWatchedEvent(reelId){
+
+    if(!reelId) return
+
+    fetch(API_URL+"/reels/watched",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer "+AUTH_TOKEN
+        },
+        body: JSON.stringify({
+            data:{
+                reelId: reelId
+            }
+        })
+    })
+        .then(res=>{
+            if(!res.ok){
+                console.log("watch API failed")
+            }
+        })
+        .catch(err=>{
+            console.log("watch API error",err)
+        })
+
+}
