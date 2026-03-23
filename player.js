@@ -167,6 +167,7 @@ function create(id, videoId, autoplay=false){
             },
             onError:(e)=>{
                 document.getElementById("thumb").style.display = "none";
+                sendWatchedEvent(reels[currentIndex].id);
             }
         }
     })
@@ -418,7 +419,7 @@ async function reloadFeed(){
 let watchTimer = null
 let viewSentForCurrentReel = false
 const WATCH_THRESHOLD_PERCENT = 50
-const WATCH_THRESHOLD_SECONDS = 3
+const WATCH_THRESHOLD_SECONDS = 5
 
 
 function startWatchTracking(){
@@ -431,10 +432,10 @@ function startWatchTracking(){
 
         try{
 
-            if(!player || !reels[currentIndex]) return
+            if(!players.current  || !reels[currentIndex]) return
 
-            const currentTime = player.getCurrentTime()
-            const duration = player.getDuration()
+            const currentTime = players.current.getCurrentTime()
+            const duration = players.current.getDuration()
 
             if(!duration || duration === 0) return
 
